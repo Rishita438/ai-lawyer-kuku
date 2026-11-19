@@ -1,0 +1,40 @@
+# Hard escalation rules (ADR / Q4: rules always fire; the model may ADD an escalation, never remove one).
+# Keywords are matched as whole words, case-insensitive, in every user message.
+# This is DATA - a lawyer can add keywords without touching code.
+
+categories:
+  safety:
+    message: >
+      It sounds like someone may be in danger. If you or anyone is in immediate danger,
+      call 112 (national emergency number) now. This assistant cannot help with safety
+      situations - please contact the police or a trusted person right away.
+    keywords: [suicide, "kill myself", "maar dalunga", "jaan se maar", violence, maarpeet, "मारपीट", "domestic violence", "ghar me maarta", threat, dhamki, "धमकी"]
+
+  criminal:
+    message: >
+      This involves criminal law or the police, which this assistant does not cover.
+      Please talk to a lawyer quickly. You may be eligible for free legal help from your
+      District Legal Services Authority or the NALSA helpline 15100.
+    keywords: [police, fir, arrest, arrested, giraftar, "गिरफ्तार", "पुलिस", warrant, "वारंट", jail, bail, criminal, ipc, bns, bnss, crpc,
+               "cheque bounce", "check bounce", "section 138", "negotiable instruments", fraud case, "420"]
+
+  court_or_official:
+    message: >
+      A notice or summons from a court, tribunal, police or government office can carry a
+      date you must not miss. This assistant will not advise on it. Please contact a lawyer
+      quickly - you may be eligible for free help from your District Legal Services
+      Authority or the NALSA helpline 15100.
+    keywords: [summons, summon, "समन", "court notice", "court date", "next hearing", tribunal, "income tax notice", "gst notice",
+               "tax notice", "consumer commission notice", "notice from consumer forum"]
+
+  out_of_scope:
+    message: >
+      This assistant only covers consumer refunds/defects (in depth), and security
+      deposits, unpaid salary and private legal notices (basics). Your question is outside
+      what it can answer reliably. Please consult a lawyer; you may be eligible for free
+      legal help (NALSA helpline 15100).
+    keywords: [divorce, talaq, "तलाक", custody, alimony, dowry, dahej, "दहेज", property dispute, "zameen", "will and testament",
+               inheritance, immigration, visa, patent, trademark]
+
+# Case-based rules (checked by code on the case file, after intake)
+high_value_threshold_rupees: 1000000      # Rs 10 lakh: above this, recommend a lawyer

@@ -1,0 +1,76 @@
+﻿
+== 1. Calculators (code, from verified KB numbers) ==
+PASS  time limit ok, deadline 2028-10-26   ({'name': 'time_limit', 'kb_ids': ['CPA2019-S69'], 'years': 2, 'status': 'ok', 'start': '2026-10-26', 'deadline': '2028-10-26', 'days_left': 707})
+PASS  District Commission for Rs 15,000
+PASS  fee is nil up to Rs 5 lakh
+PASS  fee Rs 400 for Rs 12 lakh
+PASS  fee Rs 7500 above Rs 10 crore
+PASS  State Commission for Rs 60 lakh
+PASS  Rs 48 lakh flagged near boundary
+PASS  time limit passed (problem in 2024-10)
+PASS  time limit near (problem 2024-12-10)
+PASS  unknown date -> unknown, not a guess
+
+== 2. Escalation rules (code, always fire) ==
+PASS  'police ne FIR darj ki hai' -> criminal   (got criminal)
+PASS  'mujhe cheque bounce ka notice aaya hai' -> criminal   (got criminal)
+PASS  'αñ¬αÑüαñ▓αñ┐αñ╕ αñÿαñ░ αñåαñê αñÑαÑÇ' -> criminal   (got criminal)
+PASS  'court se summons aaya hai' -> court_or_official   (got court_or_official)
+PASS  'divorce ke baare me batao' -> out_of_scope   (got out_of_scope)
+PASS  'pati maarpeet karta hai' -> safety   (got safety)
+PASS  'flipkart refund nahi de raha' -> None   (got None)
+PASS  'my order 420 rupees ka tha' -> criminal   (got criminal)
+PASS  business use -> stop consumer analysis
+PASS  time-barred -> lawyer flagged
+
+== 3. Validator vs a deliberately BAD model answer ==
+PASS  typed 'Section 2(7)' removed
+PASS  typed act name removed
+PASS  invented case law point dropped
+PASS  uncited IPC point dropped
+PASS  invented kb_id 'FAKE-ID' removed
+PASS  '30 days' (not in KB) removed
+PASS  '48 hours' (in verified KB) kept
+PASS  'Rule 4(5)' typed by model removed
+PASS  'you will win' removed
+PASS  promise 'aapko pakka refund milega' removed
+PASS  promise '100% chance hai' removed
+PASS  promise 'αñåαñ¬αñòαÑï αñ£αñ╝αñ░αÑéαñ░ αñ«αñ┐αñ▓αÑçαñùαñ╛' removed
+PASS  normal 'you may get a refund' kept
+      -> validator removed 9 item(s): invented_kb_id, legal_reference, number, promised_outcome, uncited_point_dropped
+
+== 4. Rendered answer for the bad model (what the user would see) ==
+
+### Where you stand
+
+Under [removed: unverified legal reference] of the [removed: unverified legal reference] you are a consumer and [removed: nobody can promise a legal outcome].
+
+- Flipkart must reply within 48 hours and fix it within one month.<br><small>≡ƒôÿ **Consumer Protection (E-Commerce) Rules, 2020, Rule 4(4)-(5)**: E-commerce grievance officer ΓÇö [source](https://egazette.gov.in/WriteReadData/2020/220661.pdf) (Γ£à verified 2026-11-19)</small>
+
+- You must file within [removed: unverified number].<br><small>≡ƒôÿ **Consumer Protection Act, 2019, s. 69**: Time limit for filing a complaint ΓÇö [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (Γ£à verified 2026-11-19)</small>
+
+#### Key facts (calculated by the app, not the AI)
+
+ΓÅ│ **Time limit:** Γ£à within the limit. Normally file by **2028-10-26** (2 years from 2026-10-26; dates are approximate).
+
+≡ƒÅ¢∩╕Å **Which Commission:** District Consumer Commission, for Rs 15,000 paid (you can file where you live or work: Rohtak, Haryana).
+
+≡ƒÆ░ **Filing fee:** nil (no fee).
+
+<small>Based on: ≡ƒôÿ **Consumer Protection Act, 2019, s. 2(7)**: Who is a "consumer" ΓÇö [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (Γ£à verified 2026-11-19); ≡ƒôÿ **Consumer Protection Act, 2019, s. 34**: District Commission - which one you can file in ΓÇö [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (Γ£à verified 2026-11-19); ≡ƒôÿ **Consumer Protection Act, 2019, s. 69**: Time limit for filing a complaint ΓÇö [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (Γ£à verified 2026-11-19); ≡ƒôÿ **Consumer Protection (Consumer Disputes Redressal Commissions) Rules, 2020, Rule 7 (fee table)**: Fee for filing a consumer complaint ΓÇö [source](https://egazette.gov.in/WriteReadData/2023/248158.pdf) (Γ£à verified 2026-11-19); ≡ƒôÿ **Consumer Protection (Jurisdiction of the District Commission, the State Commission and the National Commission) Rules, 2021, Rules 3-5**: Money limits - which Commission ΓÇö [source](https://www.pib.gov.in/PressReleasePage.aspx?PRID=1786342) (Γ£à verified 2026-11-19); ≡ƒôÿ **Consumer Protection (E-Commerce) Rules, 2020, Rule 4(4)-(5)**: E-commerce grievance officer ΓÇö [source](https://egazette.gov.in/WriteReadData/2020/220661.pdf) (Γ£à verified 2026-11-19)</small>
+
+### Your options
+
+**1. Complain to the grievance officer** ΓÇö fastest
+   - Email them citing [removed: unverified legal reference]
+   - Wait 48 hours
+
+   <small>≡ƒôÿ **Consumer Protection (E-Commerce) Rules, 2020, Rule 4(4)-(5)**: E-commerce grievance officer ΓÇö [source](https://egazette.gov.in/WriteReadData/2020/220661.pdf) (Γ£à verified 2026-11-19)</small>
+
+### What I'm not sure about
+- Whether the warranty covers water damage.
+
+---
+<small>Knowledge base last verified: 2026-11-19. Only verified sources are cited. The safety checker removed 9 unverified item(s) from the AI's draft. This is general information, not legal advice.</small>
+
+33/33 checks passed

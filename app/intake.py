@@ -115,8 +115,11 @@ def run_turn(case: dict, history: list[dict], user_message: str) -> dict:
     explicit = {f["key"] for f in intake["fields"] if f.get("ask_explicitly")}
     changed = merge(case, result.get("extracted", {}), explicit_only=explicit,
                     asked_key=asked["key"] if asked else None)
+    # F30: short replies ("refund", "personal use", "Rohtak, Haryana") look English even from a
+    # Hinglish speaker. Only a message of 4+ words may change the language once it is set.
     if result.get("language") in ("en", "hi", "hinglish"):
-        case["language"] = result["language"]
+        if case.get("language") is None or len(user_message.split()) >= 4:
+            case["language"] = result["language"]
 
     nxt = next_field(case, intake)              # CODE decides the next question
     reply = phrase(case, user_message, nxt)

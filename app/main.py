@@ -1,8 +1,8 @@
 """
 main.py - the Streamlit web app.   Run:  streamlit run app/main.py
 
-Stage 3 version: collects the facts of a consumer problem and shows the live case file.
-Legal analysis, citations and drafting arrive in Stages 4-5.
+Collects the facts (Stage 3), then explains where the user stands with verified citations (Stage 4).
+Drafting arrives in Stage 5.
 """
 import sys
 from pathlib import Path
@@ -16,6 +16,9 @@ import yaml
 from app import llm
 from app.case_file import new_case, load_intake, missing, can_draft, UNKNOWN
 from app.intake import run_turn
+from app.escalation import check_message
+from app.analysis import analyse
+from app.render import analysis_md
 
 PACKS_READY = ["consumer"]                       # packs that have an intake.yaml so far
 
@@ -32,6 +35,7 @@ def reset(pack: str):
     st.session_state.history = [{"role": "assistant",
                                  "content": load_intake(pack)["opening_message"].strip()}]
     st.session_state.done = False
+    st.session_state.analysis = None          # Stage 4 result, computed once when intake completes
 
 
 # ---------- sidebar ----------
@@ -57,7 +61,7 @@ chat_col, case_col = st.columns([2, 1])
 with chat_col:
     for msg in st.session_state.history:
         with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+            st.markdown(msg["content"], unsafe_allow_html=True)   # model text is escaped in render.py
 
     user_text = st.chat_input("Type your message (English / हिंदी / Hinglish)")
     if user_text:
@@ -65,15 +69,27 @@ with chat_col:
         with st.chat_message("user"):
             st.markdown(user_text)
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                try:
-                    result = run_turn(st.session_state.case, st.session_state.history[:-1], user_text)
-                    reply = result["reply"]
-                    st.session_state.done = result["done"]
-                except Exception as err:          # model down, bad JSON twice, etc.
-                    reply = f"Sorry, something went wrong talking to the AI model ({err}). Please try again."
+            hit = check_message(user_text)            # HARD escalation rules run first, in code
+            if hit:
+                reply = f"⚖️ {hit['message']}"
+                print(f"[escalation] {hit['category']} (matched {hit['matched']!r})")
+            else:
+                with st.spinner("Thinking..."):
+                    try:
+                        result = run_turn(st.session_state.case, st.session_state.history[:-1], user_text)
+                        reply = result["reply"]
+                        st.session_state.done = result["done"]
+                    except Exception as err:          # model down, bad JSON twice, etc.
+                        reply = f"Sorry, something went wrong talking to the AI model ({err}). Please try again."
             st.markdown(reply)
         st.session_state.history.append({"role": "assistant", "content": reply})
+
+        # Stage 4: once intake is complete, explain where they stand (once).
+        if st.session_state.done and st.session_state.analysis is None and not hit:
+            with st.spinner("Checking your case against the verified knowledge base..."):
+                st.session_state.analysis = analyse(st.session_state.case)
+            st.session_state.history.append({"role": "assistant",
+                                             "content": analysis_md(st.session_state.analysis)})
         st.rerun()
 
 # ---------- live case file ----------
@@ -103,3 +119,17 @@ with case_col:
     else:
         st.info(f"{still_needed} question(s) left.")
     st.caption("Ready to draft a complaint: " + ("yes" if can_draft(st.session_state.case, intake) else "not yet"))
+
+    # Transparency: what the citation/number checker removed from the AI's draft.
+    res = st.session_state.get("analysis")
+    if res:
+        log = res.get("validator_log", [])
+        with st.expander(f"🛡️ Safety checker: {len(log)} item(s) removed"):
+            if not log:
+                st.write("Nothing removed - every citation was a verified KB entry.")
+            for item in log:
+                st.write(f"- **{item['type']}**: `{item['text']}`")
+        if st.button("Re-run analysis"):
+            st.session_state.analysis = analyse(st.session_state.case)
+            st.session_state.history.append({"role": "assistant", "content": analysis_md(st.session_state.analysis)})
+            st.rerun()
