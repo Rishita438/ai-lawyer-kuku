@@ -1,0 +1,71 @@
+# SHARED entries, available to every pack (legal aid, law-change notes).
+kb_last_verified: 2026-11-19
+
+entries:
+  - id: LSA1987-S12
+    type: law
+    act: Legal Services Authorities Act, 1987
+    section: "12"
+    title: Who can get free legal aid
+    plain_summary: >
+      Free legal services in these cases: Scheduled Caste/Tribe members, trafficking
+      or begar victims, women, children, persons with disabilities, victims of mass disaster, 
+      ethnic violence, caste atrocity, flood, drought, earthquake or industrial disaster, 
+      industrial workmen, people in custody (including protective homes, juvenile homes, 
+      psychiatric hospitals), and people whose annual income is below the limit set by the 
+      State Government (or by the Central Government for Supreme Court cases). The limit 
+      may differ by state.
+    applies_when: Every escalation to a lawyer - tell the user free help may be available.
+    does_not_apply_when: n/a
+    lay_questions: ["I can't afford a lawyer", "free vakil kaise milega?"]
+    source_name: India Code - Legal Services Authorities Act, 1987
+    source_url: https://indiacode.gov.in/act/a742f03e-3129-4b8d-8dda-af2a36190b18/sections?spc.sf=dc.date.issued&spc.sd=DESC&spc.page=2&spc.rpp=10   
+    jurisdiction: central
+    status: verified
+    ai_confidence: high
+    verified_by: Rishita
+    last_verified: 2026-11-19
+
+  - id: PROC-NALSA
+    type: procedure
+    title: How to reach free legal aid
+    plain_summary: >
+      Free legal aid is run by NALSA and by State and District Legal Services Authorities.
+      Depending on the court, you approach the Taluk Legal Services Committee, the District 
+      Legal Services Authority (at the district court), the State Legal Services Authority, 
+      or the High Court or Supreme Court Legal Services Committee. You can apply in person or 
+      by post, with a written application (plain paper is fine), by email, online on the NALSA 
+      website, or orally with help from a paralegal volunteer or officer. Keep identity proof 
+      and any category certificates ready. The toll-free helpline is 15100.
+    applies_when: Every escalation.
+    does_not_apply_when: n/a
+    lay_questions: ["Where do I find a free lawyer?"]
+    source_name: National Legal Services Authority
+    source_url: https://nalsa.gov.in/legal-aid/#Free-Legal-Aid
+    jurisdiction: central
+    status: verified
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Verified 2026-11-19: helpline 15100 and DLSA route seen on nalsa.gov.in/legal-aid/. Some states also run their own helplines."
+
+  - id: NOTE-BNS
+    type: procedure
+    title: Criminal law changed in 2024
+    plain_summary: >
+      The Bharatiya Nyaya Sanhita, 2023 (BNS) replaced the Indian Penal Code,
+      and the Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS) replaced the Code
+      of Criminal Procedure, 1973. Both came into force on 1 July 2024. For
+      offences committed before that date, and for proceedings already pending,
+      the old law can still apply. The bot does not advise on criminal matters.
+    does_not_apply_when: n/a
+    lay_questions: ["IPC 420 lagega kya?"]
+    source_name: India Code
+    source_url: https://indiacode.gov.in/act/4bb3e636-ed67-4731-8fb1-7ebfd83e1584/sections   
+    jurisdiction: central
+    status: verified
+    ai_confidence: high
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    
+    #https://indiacode.gov.in/act/72592ac7-d084-4545-95d3-0c98dc49fac3/sections?spc.rpp=10&spc.sf=dc.date.issued&spc.sd=DESC&spc.page=54

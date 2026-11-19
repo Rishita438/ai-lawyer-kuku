@@ -1,0 +1,90 @@
+# Intake for the CONSUMER pack: which facts the bot collects, in what order.
+# This is DATA, not code - a lawyer could edit this file without touching Python.
+#
+# required: true  -> the bot keeps asking until it has this (or the user says they don't know)
+# required_for_draft -> drafting a complaint/notice is BLOCKED until these are filled (ADR-009)
+# type: text | date | money | yesno | list   (tells the model what format to extract)
+# ask_explicitly: true -> code ignores this fact unless it was the question asked in that turn
+#                         (stops the model "assuming" important answers - see FAILURES F17)
+
+pack: consumer
+title: Consumer refund / defective product or service
+opening_message: >
+  Tell me what happened, in your own words - English, Hindi or Hinglish is fine.
+  For example: what you bought, from whom, and what went wrong.
+
+fields:
+  - key: product_or_service
+    question: What did you buy or pay for?
+    type: text
+    required: true
+    required_for_draft: true
+
+  - key: seller_name
+    question: Who did you buy it from (shop, company or website/app)?
+    type: text
+    required: true
+    required_for_draft: true
+
+  - key: bought_online
+    question: Did you buy it online (website/app) or from a physical shop?
+    type: yesno
+    hint: "true if online, false if a physical shop"
+    required: true
+    required_for_draft: false
+
+  - key: amount_paid
+    question: How much did you pay, in rupees?
+    type: money
+    required: true
+    required_for_draft: true
+
+  - key: purchase_date
+    question: When did you buy it (approximate date is fine)?
+    type: date
+    required: true
+    required_for_draft: true
+
+  - key: what_went_wrong
+    question: What exactly went wrong, and when did you first notice it?
+    type: text
+    required: true
+    required_for_draft: true
+
+  - key: problem_date
+    question: On what date did the problem happen, or the refund become due?
+    type: date
+    required: true
+    required_for_draft: true
+
+  - key: for_business_use
+    question: Did you buy this for your own personal use, or to resell / use in a business?
+    type: yesno
+    hint: "true if resale or business use, false if personal use"
+    ask_explicitly: true   # only accepted when the user answers THIS question (F17: model assumed it)
+    required: true
+    required_for_draft: false
+
+  - key: complaints_made
+    question: Have you already complained to the seller or platform? If yes, how and when, and what did they say?
+    type: text
+    required: true
+    required_for_draft: false
+
+  - key: evidence
+    question: What proof do you have? (invoice/bill, order ID, payment screenshot, emails, chats, photos, warranty card)
+    type: list
+    required: true
+    required_for_draft: true
+
+  - key: desired_outcome
+    question: What would you like - refund, replacement, repair, or compensation?
+    type: text
+    required: true
+    required_for_draft: true
+
+  - key: user_city_state
+    question: Which city and state do you live in? (This decides where you can file.)
+    type: text
+    required: true
+    required_for_draft: true

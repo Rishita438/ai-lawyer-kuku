@@ -1,0 +1,50 @@
+# Knowledge base for the NOTICE EXPLAINER pack (light pack).
+# This pack explains a notice the user pastes. It cites almost nothing;
+# its main job is to spot WHO sent it and WHAT deadline it sets, and escalate when needed.
+kb_last_verified: 2026-11-19
+
+entries:
+  - id: PROC-NOTICE-PRIVATE
+    type: procedure
+    title: A legal notice from a person or company is not a court order (general practice)
+    plain_summary: >
+      A legal notice sent by a lawyer on behalf of a person or company is a formal
+      demand, not a court order or a finding against you. Do not ignore it. Note the
+      deadline it gives, keep the envelope and any proof of when you received it, and
+      get advice before replying. This is general guidance, not a legal rule.
+    applies_when: Notice is from an advocate / company about money, deposits, refunds, or a contract.
+    does_not_apply_when: Summons, warrant, or any notice from a court, police, or tax/government authority;
+      any notice mentioning a cheque bounce, "Section 138" or the Negotiable Instruments Act;
+      any notice mentioning IPC/BNS or a criminal complaint; eviction notices.
+      -> escalate to a lawyer / legal aid immediately.
+    lay_questions: ["I got a legal notice, what does it mean?", "notice aaya hai, kya karun?"]
+    source_name: General procedure (no statute)
+    source_url: null
+    jurisdiction: central
+    status: reviewed
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Reviewed 2026-11-19. Practice guidance, no statute. Added escalation for cheque-bounce (s.138 NI Act) notices: privately sent but part of a criminal process with a strict deadline. Replaced 'guilty' wording."
+
+
+  - id: PROC-NOTICE-OFFICIAL
+    type: procedure
+    title: Court, police, tribunal or government notices need a lawyer
+    plain_summary: >
+      If the paper is from a court (for example a summons), the police, a Consumer
+      Commission or other tribunal, or a tax or government authority, this assistant
+      will not advise on it. These notices often carry a date you must not miss.
+      Contact a lawyer quickly. You may be eligible for free legal help from your
+      District Legal Services Authority or the NALSA helpline 15100.
+    applies_when: Any official, court, tribunal, police or government notice (hard escalation rule).
+    does_not_apply_when: n/a
+    lay_questions: ["Court se summons aaya hai", "police notice", "consumer forum se notice aaya", "income tax notice"]
+    source_name: National Legal Services Authority (for legal aid route)
+    source_url: https://nalsa.gov.in/legal-aid/ 
+    jurisdiction: central
+    status: verified
+    ai_confidence: high
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Verified 2026-11-19: legal-aid route and 15100 per nalsa.gov.in (see PROC-NALSA). Refusal to advise is a design policy (D8), not a legal claim. 'Free help' softened to 'may be eligible' per LSA1987-S12."

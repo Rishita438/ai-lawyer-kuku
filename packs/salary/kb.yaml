@@ -1,0 +1,111 @@
+# Knowledge base for the UNPAID SALARY pack (light pack).
+# WARNING: the four Labour Codes took effect on 21 Nov 2025 and repealed older laws
+# (e.g., Payment of Wages Act, 1936). Central and state RULES are still rolling out.
+# Every answer from this pack must say so.
+kb_last_verified: 2026-11-19
+
+entries:
+  - id: COW2019-S17
+    type: law
+    act: Code on Wages, 2019
+    section: "17"
+    title: Deadline for paying wages
+    plain_summary: >
+      Under the Code on Wages, 2019, the employer must pay wages within time
+      limits that depend on how the employee is paid: daily-paid employees at
+      the end of the shift; weekly-paid on the last working day of the week,
+      before the weekly holiday; fortnightly-paid before the end of the second
+      day after the fortnight ends; and monthly-paid before the expiry of the
+      seventh day of the following month. When an employee is removed,
+      dismissed, retrenched, resigns, or becomes unemployed because the
+      establishment closes, the wages payable must be paid within two working
+      days. The appropriate Government may set a different time limit where it
+      considers it reasonable, and time limits in any other law are not
+      affected.
+    applies_when: An employee's wages are paid late, or the wages payable are not paid after the employee leaves or is removed.
+    does_not_apply_when: The person is not an "employee" under the Code, for example an apprentice engaged under the Apprentices Act, 1961, or a member of the Armed Forces of the Union. Also check whether the appropriate Government has set a different time limit under section 17(3).
+    lay_questions: ["Salary nahi aayi", "Company hasn't paid my last month salary"]
+    source_name: Code on Wages, 2019 (Section 17 and Section 2(k))
+    source_url: https://indiacode.gov.in/act/77a51a9b-c4c0-455c-809c-13d2efb3c8e5/sections?spc.rpp=10&spc.sf=dc.date.issued&spc.sd=DESC&spc.page=1
+    jurisdiction: central
+    status: verified
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Section 17(1)-(4) and the definition of employee in section 2(k) checked in screenshots. Not checked: the Act title and whether the Code is in force, any different time limit set by the appropriate Government under s.17(3), and the definition of establishment. s.2(k) shows no wage ceiling; other sections not checked."
+
+
+  - id: COW2019-S45
+    type: law
+    act: Code on Wages, 2019
+    section: "45"
+    title: Filing a wage claim with the authority
+    plain_summary: >
+      Under the Code on Wages, 2019, claims that arise under the Code are heard
+      and decided by an authority that the appropriate Government appoints by
+      notification, of a rank not below a Gazetted Officer. The application can
+      be filed by the employee, by a registered trade union the employee
+      belongs to, or by the Inspector-cum-Facilitator, and one application can
+      cover several employees of an establishment, subject to rules. It may be
+      filed within three years from the date the claim arises, and the
+      authority can accept a later application if the applicant shows
+      sufficient cause for the delay. The authority tries to decide within
+      three months, and may order compensation in addition to the claim, up to
+      ten times the claim determined. If the employer does not pay, the
+      authority can issue a recovery certificate to the Collector or District
+      Magistrate, who recovers it as arrears of land revenue.
+    applies_when: An employee has a claim that arises under the Code, for example wages not paid within the time limits in section 17.
+    does_not_apply_when: The person is not an "employee" under the Code (for example an apprentice under the Apprentices Act, 1961, or a member of the Armed Forces of the Union), or the claim does not arise under the Code.
+    lay_questions: ["Where do I complain about salary?", "labour office mein complaint"]
+    source_name: Code on Wages, 2019 (Section 45)
+    source_url: https://indiacode.gov.in/act/77a51a9b-c4c0-455c-809c-13d2efb3c8e5/sections?spc.rpp=10&spc.sf=dc.date.issued&spc.sd=DESC&spc.page=5
+    jurisdiction: central
+    status: verified
+    ai_confidence: low
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Section 45(1)-(7) checked in screenshots. Not checked: Act title and whether the Code is in force, which authority a given state or the Centre has actually notified, rules under s.45(5), appeal under s.49, and whether any other section limits going to a civil court. Do not name a specific office for the user."
+
+  - id: NOTE-LABOUR-CODES
+    type: procedure
+    title: Labour law changed recently
+    plain_summary: >
+      Four Labour Codes, including the Code on Wages, 2019, came into force on
+      21 November 2025 and rationalise 29 older central labour laws. The Code on
+      Wages repeals the Payment of Wages Act, 1936, the Minimum Wages Act, 1948,
+      the Payment of Bonus Act, 1965 and the Equal Remuneration Act, 1976, with a
+      savings clause for things done under them. Rules and procedures can differ
+      by state, so check the current position for the user's state. For wages
+      that were due before 21 November 2025, which law applies can be unclear,
+      so check with a lawyer.
+    applies_when: Background for any question about unpaid salary or wage law, especially if the wages relate to a period before 21 November 2025.
+    does_not_apply_when: n/a
+    lay_questions: ["Which law applies to salary?"]
+    source_name: Ministry of Labour and Employment (PIB release, 21 Nov 2025); Code on Wages, 2019 (Section 69)
+    source_url: https://labour.gov.in/sites/default/files/pib2192463.pdf   
+    jurisdiction: central
+    status: verified
+    ai_confidence: high
+    verified_by: Rishita
+    last_verified: 2026-11-19
+
+  - id: PROC-DEMAND-LETTER
+    type: procedure
+    title: Send a written demand first (general practice)
+    plain_summary: >
+      A common first step is to write to your employer (email the manager and HR) listing
+      the months unpaid, the exact amount, and a deadline to pay. Keep a copy. Collect
+      proof: appointment/offer letter, payslips, bank statements showing past salary,
+      attendance records, and emails or chats about the delay. This is general practice,
+      not a legal requirement. If the employer still does not pay, you can file a wage
+      claim with the labour authority (see Code on Wages, section 45).
+    applies_when: First step in any unpaid-salary case.
+    does_not_apply_when: n/a
+    lay_questions: ["What proof do I need?", "kya saboot chahiye?", "salary ke liye email kaise likhun?"]
+    source_name: General procedure (no statute)
+    source_url: null
+    jurisdiction: central
+    status: reviewed
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19

@@ -1,0 +1,103 @@
+# Knowledge base for the SECURITY DEPOSIT pack (light pack).
+# Rent law is mostly STATE law. v1 covers only central law + the Model Tenancy Act,
+# and always tells the user that rules differ by state.
+kb_last_verified: 2026-11-19
+
+entries:
+  - id: ICA1872-S73
+    type: law
+    act: Indian Contract Act, 1872
+    section: "73"
+    title: Compensation when a contract is broken
+    plain_summary: >
+      When a contract has been broken, the party who suffers by the breach is
+      entitled to compensation from the party who broke it for any loss or
+      damage that naturally arose in the usual course of things from the breach,
+      or which both parties knew, when they made the contract, was likely to
+      result from it. Compensation is not given for remote and indirect loss.
+      The same applies to failure to discharge an obligation resembling one
+      created by contract.
+    applies_when: A contract has been broken and the other side suffered loss, for example a landlord does not return a deposit that the agreement says is refundable (depends on the terms of the agreement).
+    does_not_apply_when: There is no breach, or the loss is remote and indirect.
+    lay_questions: ["Landlord won't return my deposit", "makaan malik deposit nahi de raha"]
+    source_name: India Code - Indian Contract Act, 1872
+    source_url: https://indiacode.gov.in/act/0e782442-f035-4d53-aace-81b1552a8cf2/sections?spc.rpp=10&spc.sf=dc.date.issued&spc.sd=DESC&spc.page=8
+    jurisdiction: central
+    status: verified
+    ai_confidence: high
+    verified_by: Rishita
+    last_verified: 2026-11-19
+
+  - id: LIM1963-MONEY
+    type: law
+    act: Limitation Act, 1963
+    section: "Schedule (Articles 7, 22, 55, 113 as examples)"
+    title: Time limit to sue for money
+    plain_summary: >
+      Most suits to recover money must be filed within 3 years, but when the
+      3 years start depends on the type of claim. For example, for wages it
+      runs from when the wages fall due, for breach of contract from when the
+      contract is broken, and for money deposited on demand from when the demand
+      is made. A suit with no specific period in the Schedule also has 3 years
+      from when the right to sue arises. Some claims have different periods (for
+      example 1 year for libel and 12 years for some property claims). The exact
+      deadline depends on the claim and should be checked with a lawyer.
+    applies_when: Estimating whether a deposit/salary claim in civil court may be late.
+    does_not_apply_when: Consumer complaints (2-year rule in CPA s.69 applies instead).
+    lay_questions: ["Is it too late to claim my deposit?", "kitne saal tak paisa wapas maang sakte hain?"]
+    source_name: India Code - Limitation Act, 1963 (Schedule)
+    source_url: https://indiacode.gov.in/server/api/core/bitstreams/ad4711f7-2ef9-41c3-8b7a-30050493cbb2/content
+    jurisdiction: central
+    status: verified
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Schedule checked. Which article applies to a rent security deposit is not verified, so the summary stays general. Sections on extension or acknowledgment not checked."
+
+  - id: MTA2021-S11
+    type: law
+    act: Model Tenancy Act, 2021
+    section: "11"
+    title: Security deposit cap and refund (ONLY in states that adopted it)
+    plain_summary: >
+      The Model Tenancy Act, 2021 is a template law for States and Union
+      territories: its enacting words and name are left blank for each state to
+      fill in, so it binds no one unless a state passes its own law based on it.
+      Under Section 11 of the model text, the security deposit is whatever the
+      landlord and tenant agree in the tenancy agreement, but it must not exceed
+      two months' rent for residential premises or six months' rent for
+      non-residential premises. It is to be refunded on the date the landlord
+      takes over vacant possession from the tenant, after deducting any
+      liability of the tenant. A state's own law may change these numbers, so
+      the rules that bind the user are those of their state.
+    applies_when: Only after confirming the user's state adopted the Model Act.
+    does_not_apply_when: The state has not adopted it - then do not rely on it. Also, the model text itself leaves out some premises (Section 3), such as government-owned premises, premises an employer gives to its employees under a service contract, and certain religious, charitable or waqf/trust premises.
+    lay_questions: ["Can landlord take 6 months deposit?", "makaan malik kitna deposit le sakta hai?"]
+    source_name: Ministry of Housing and Urban Affairs, Model Tenancy Act, 2021 (Section 11)
+    source_url: https://www.mohua.gov.in/static/uploads/2025/11/9ada3e2d46992be72cabf7028d633b87.pdf
+    jurisdiction: model
+    status: verified
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Section 11(1)-(2) text checked in the Act PDF (pp. 8-9 of 28). The PDF is a template with blanks for state name and legislature. Cabinet approval and circulation to states come from PIB (Jul 2022), not from the PDF. Model s.4(6): without tenancy information filed with the Rent Authority, no relief under the Act. Do not list adopting states."
+
+  - id: PROC-LEGAL-NOTICE
+    type: procedure
+    title: Send a legal notice first (general practice)
+    plain_summary: >
+      A common first step is a written notice to the landlord stating the deposit
+      amount, the date you vacated, and a deadline to pay. Keep proof of sending
+      (speed post receipt, email). You can send it yourself; a lawyer is not required.
+      This is general practice, not a legal requirement.
+    applies_when: Any deposit dispute before going to court.
+    does_not_apply_when: n/a
+    lay_questions: ["What should I do first?", "notice kaise bhejun?"]
+    source_name: General procedure (no statute)
+    source_url: null
+    jurisdiction: central
+    status: reviewed
+    ai_confidence: medium
+    verified_by: Rishita
+    last_verified: 2026-11-19
+    notes: "Reviewed 2026-11-19: no statute governs a private legal notice; kept as general practice. Removed unsupported claim that a lawyer's notice is 'taken more seriously'."
