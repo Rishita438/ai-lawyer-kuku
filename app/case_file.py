@@ -32,7 +32,7 @@ def merge(case: dict, extracted: dict, explicit_only: set[str] = frozenset(),
       - ignore keys that are not in the intake (the model can't invent new fields)
       - ignore empty values (None, "", [])
       - never overwrite a real answer with "unknown"
-      - a fact the user said they don't know can only change when that question is asked again
+      - an answered fact (real value or "unknown") can only change when that question is asked again
       - fields in `explicit_only` are accepted ONLY if they were the question just asked
         (the model tends to assume answers like "personal use" - FAILURES F17)
     """
@@ -45,9 +45,10 @@ def merge(case: dict, extracted: dict, explicit_only: set[str] = frozenset(),
         current = case["facts"][key]
         if value == UNKNOWN and current not in (None, UNKNOWN):
             continue
-        if current == UNKNOWN and key != asked_key:
-            # F28: user said "I don't know" for this fact. A later answer to a DIFFERENT
-            # question must not fill it (model copied the problem date into purchase date).
+        if current is not None and key != asked_key:
+            # F28 + F32: once a fact is answered (a real value OR "don't know"), only an answer to
+            # THAT question may change it. The model had copied the problem-date answer
+            # ("26 september") over the purchase date ("19 september") in a later turn.
             continue
         if value != current:
             case["facts"][key] = value

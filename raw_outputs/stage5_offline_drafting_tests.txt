@@ -1,0 +1,92 @@
+﻿
+== 1. Complaint with a well-behaved model ==
+PASS  model paragraph accepted   ([])
+PASS  citations come from the verified KB
+PASS  name/address are placeholders, never invented
+PASS  district left as placeholder (not guessed)
+PASS  state taken from user's answer
+PASS  placeholders listed for the user   ([DATE], [DISTRICT NAME], [OPPOSITE PARTY'S REGISTERED ADDRESS ΓÇô see your invoice or the website's legal/contact page], [PLACE], [SIGNATURE OF COMPLAINANT], [YOUR FULL ADDRESS], [YOUR FULL NAME])
+PASS  explanation in Hinglish
+
+== 2. Model invents a date, an amount and a section ==
+PASS  paragraph rejected   (model paragraph rejected -> plain version used: number not in case file: 12; number not in case file: 18000; number not in case file: 9; legal reference: Section 2(9))
+PASS  invented date not in document
+PASS  invented amount not in document
+PASS  typed section not in document
+PASS  plain version uses the real facts
+
+== 3. Model unavailable (503) ==
+PASS  letter still produced from facts   (model unavailable (Error code: 503) -> plain version used)
+PASS  e-commerce rule cited from KB with verified numbers
+
+== 4. Gates ==
+PASS  unknown purchase date -> complaint locked   (When did you buy it (approximate date is fine)? (tip: check your invoice or order history))
+PASS  ...but grievance letter still allowed
+PASS  ...with a placeholder, not a guess
+PASS  shop purchase -> no e-commerce letter offered
+PASS  time limit passed -> complaint locked
+PASS  business use -> complaint locked
+
+== 5. The complaint as the user would download it ==
+
+**BEFORE THE DISTRICT CONSUMER DISPUTES REDRESSAL COMMISSION, [DISTRICT NAME], HARYANA**
+
+Consumer Complaint No. ______ of ______ (to be filled by the Commission)
+
+**Complainant:**
+[YOUR FULL NAME], [YOUR FULL ADDRESS], Rohtak, Haryana
+
+**Versus**
+
+**Opposite Party:**
+Flipkart, [OPPOSITE PARTY'S REGISTERED ADDRESS ΓÇô see your invoice or the website's legal/contact page]
+
+---
+
+**COMPLAINT**
+
+**1. Facts of the case**
+
+1. On 19 September 2026, I purchased a Redmi phone from Flipkart for Rs 15,000.
+
+2. On 26 October 2026, the phone stopped working.
+
+3. I complained to Flipkart customer care but received no response.
+
+**2. Complaints made before filing**
+
+Complained to Flipkart customer care, no response
+
+**3. Jurisdiction**
+
+(a) The value of the goods/services paid as consideration is Rs 15,000, which is within the limit of this Commission (Rules 3-5 of the Consumer Protection (Jurisdiction of the District Commission, the State Commission and the National Commission) Rules, 2021).
+
+(b) The Complainant resides/personally works for gain at Rohtak, Haryana, within the area of this Commission (Section 34 of the Consumer Protection Act, 2019).
+
+**4. Limitation**
+
+The cause of action arose on or about 26 October 2026. This complaint is filed within the period allowed (Section 69 of the Consumer Protection Act, 2019).
+
+**5. Relief sought**
+
+The Complainant respectfully requests this Commission to direct the Opposite Party to:
+(a) provide a full refund;
+(b) pay such compensation and costs as this Commission considers just (Section 39 of the Consumer Protection Act, 2019).
+
+**6. List of documents**
+
+1. invoice
+2. order ID
+3. chat screenshots
+
+**Verification**
+
+I, [YOUR FULL NAME], the Complainant, state that the contents of this complaint are true and correct to the best of my knowledge and belief, and nothing material has been concealed.
+
+Place: [PLACE]
+Date: [DATE]
+
+[SIGNATURE OF COMPLAINANT]
+
+
+20/20 checks passed

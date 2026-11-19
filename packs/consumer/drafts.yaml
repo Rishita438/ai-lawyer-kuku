@@ -1,0 +1,43 @@
+# Documents this pack can draft (Stage 5). DATA, not code: a lawyer can edit templates/wording.
+#
+# requires_full_case: true -> only offered when every required_for_draft fact is a real value
+#                             (a formal complaint must not be filed on unknown facts)
+# explain_*: shown with the draft, in the user's language (documents themselves are in English,
+#            which is what Commissions and companies normally use - decision D9)
+
+documents:
+  - id: grievance_letter
+    title: Complaint to the platform's grievance officer
+    template: templates/grievance_letter.md
+    requires_full_case: false
+    only_if: {bought_online: true}
+    explain_en: >
+      A formal written complaint to the online platform's grievance officer. Send it by email
+      (find the grievance officer's contact on the platform's website or app) and keep a copy.
+      If there is no proper resolution, it becomes proof that you tried to settle first.
+    explain_hinglish: >
+      Yeh online platform ke grievance officer ko ek formal likhit complaint hai. Ise email se
+      bhejiye (grievance officer ka contact platform ki website ya app par milega) aur ek copy
+      rakhiye. Agar sahi hal nahi milta, to yeh saboot banta hai ki aapne pehle baat karke
+      suljhane ki koshish ki.
+    explain_hi: >
+      यह ऑनलाइन प्लेटफ़ॉर्म के शिकायत अधिकारी को एक औपचारिक लिखित शिकायत है। इसे ईमेल से
+      भेजिए (शिकायत अधिकारी का संपर्क प्लेटफ़ॉर्म की वेबसाइट या ऐप पर मिलेगा) और एक कॉपी रखिए।
+      अगर सही हल नहीं मिलता, तो यह सबूत बनता है कि आपने पहले बात करके सुलझाने की कोशिश की।
+
+  - id: commission_complaint
+    title: Draft complaint to the District Consumer Commission
+    template: templates/complaint.md
+    requires_full_case: true
+    explain_en: >
+      A first draft of a consumer complaint. File it online on e-Jagriti and follow the
+      portal's instructions - it may ask for more details or documents. Read every line, fill
+      every [PLACEHOLDER], and make sure every statement is true before you file.
+    explain_hinglish: >
+      Yeh consumer complaint ka pehla draft hai. Ise e-Jagriti par online file kijiye aur portal
+      ke instructions follow kijiye - wahan aur details ya documents maange ja sakte hain. Har
+      line padhiye, har [PLACEHOLDER] bhariye, aur file karne se pehle pakka kijiye ki har baat sach hai.
+    explain_hi: >
+      यह उपभोक्ता शिकायत का पहला ड्राफ़्ट है। इसे ई-जागृति पर ऑनलाइन दर्ज कीजिए और पोर्टल के
+      निर्देशों का पालन कीजिए - वहाँ और जानकारी या दस्तावेज़ माँगे जा सकते हैं। हर पंक्ति पढ़िए,
+      हर [PLACEHOLDER] भरिए, और दर्ज करने से पहले पक्का कीजिए कि हर बात सच है।

@@ -2,7 +2,7 @@
 main.py - the Streamlit web app.   Run:  streamlit run app/main.py
 
 Collects the facts (Stage 3), then explains where the user stands with verified citations (Stage 4).
-Drafting arrives in Stage 5.
+Then drafts documents with [PLACEHOLDERS] for anything unknown (Stage 5).
 """
 import sys
 from pathlib import Path
@@ -19,6 +19,8 @@ from app.intake import run_turn
 from app.escalation import check_message
 from app.analysis import analyse
 from app.render import analysis_md
+from app import drafting
+from html import escape
 
 PACKS_READY = ["consumer"]                       # packs that have an intake.yaml so far
 
@@ -36,6 +38,7 @@ def reset(pack: str):
                                  "content": load_intake(pack)["opening_message"].strip()}]
     st.session_state.done = False
     st.session_state.analysis = None          # Stage 4 result, computed once when intake completes
+    st.session_state.drafts = {}              # Stage 5: doc_id -> drafted document
 
 
 # ---------- sidebar ----------
@@ -129,6 +132,33 @@ with case_col:
                 st.write("Nothing removed - every citation was a verified KB entry.")
             for item in log:
                 st.write(f"- **{item['type']}**: `{item['text']}`")
+        # ---------- Stage 5: documents ----------
+        if not any(e["stop"] for e in res["escalations"]):
+            st.divider()
+            st.subheader("📄 Documents")
+            for doc in drafting.available(st.session_state.case):
+                if doc["ok"]:
+                    if st.button(f"Draft: {doc['title']}", key=f"draft_{doc['id']}"):
+                        with st.spinner("Drafting..."):
+                            d = drafting.draft(st.session_state.case, doc["id"])
+                        st.session_state.drafts[doc["id"]] = d
+                        todo = "\n".join(f"- `{p}`" for p in d["placeholders"])
+                        checker = (f"<br>🛡️ {'; '.join(d['log'])}" if d["log"] else "")
+                        st.session_state.history.append({"role": "assistant", "content":
+                            f"### 📄 {d['title']}\n\n{d['explain']}\n\n"
+                            f"**Fill in these {len(d['placeholders'])} item(s) before using it:**\n{todo}\n\n---\n\n"
+                            f"{escape(d['text'], quote=False)}\n\n---\n"
+                            f"<small>Draft only - read every line and make sure it is true. Legal references come "
+                            f"from the verified knowledge base (last verified {d['kb_last_verified']}).{checker}</small>"})
+                        st.rerun()
+                else:
+                    st.caption(f"🔒 {doc['title']} - needs first:")
+                    for w in doc["why_not"]:
+                        st.caption(f"  • {w}")
+            for doc_id, d in st.session_state.drafts.items():
+                st.download_button(f"⬇️ Download: {d['title']}", d["text"],
+                                   file_name=f"{doc_id}.txt", key=f"dl_{doc_id}")
+
         if st.button("Re-run analysis"):
             st.session_state.analysis = analyse(st.session_state.case)
             st.session_state.history.append({"role": "assistant", "content": analysis_md(st.session_state.analysis)})

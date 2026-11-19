@@ -5,6 +5,7 @@
 # required_for_draft -> drafting a complaint/notice is BLOCKED until these are filled (ADR-009)
 # question_hinglish / question_hi: ready-written translations, chosen by CODE from the
 #   detected language (F27: the model kept asking in English after a Hinglish reply).
+# find_hint: shown in a draft's [PLACEHOLDER] when the fact is unknown (Stage 5)
 # type: text | date | money | yesno | list   (tells the model what format to extract)
 # ask_explicitly: true -> code ignores this fact unless it was the question asked in that turn
 #                         (stops the model "assuming" important answers - see FAILURES F17)
@@ -17,6 +18,7 @@ opening_message: >
 
 fields:
   - key: product_or_service
+    find_hint: "the product name on your invoice"
     question: What did you buy or pay for?
     question_hinglish: "Aapne kya khareeda tha, ya kis cheez/service ke liye paise diye the?"
     question_hi: "आपने क्या खरीदा था, या किस चीज़/सेवा के लिए पैसे दिए थे?"
@@ -25,6 +27,7 @@ fields:
     required_for_draft: true
 
   - key: seller_name
+    find_hint: "the seller/platform name on your invoice"
     question: Who did you buy it from (shop, company or website/app)?
     question_hinglish: "Aapne yeh kisse khareeda tha (dukaan, company ya website/app)?"
     question_hi: "आपने यह किससे खरीदा था (दुकान, कंपनी या वेबसाइट/ऐप)?"
@@ -42,6 +45,7 @@ fields:
     required_for_draft: false
 
   - key: amount_paid
+    find_hint: "check your invoice or bank/UPI statement"
     question: How much did you pay, in rupees?
     question_hinglish: "Aapne kitne rupaye diye the?"
     question_hi: "आपने कितने रुपये दिए थे?"
@@ -50,6 +54,7 @@ fields:
     required_for_draft: true
 
   - key: purchase_date
+    find_hint: "check your invoice or order history"
     question: When did you buy it (approximate date is fine)?
     question_hinglish: "Aapne yeh kab khareeda tha (lagbhag date bhi chalegi)?"
     question_hi: "आपने यह कब खरीदा था (लगभग तारीख भी चलेगी)?"
@@ -66,6 +71,8 @@ fields:
     required_for_draft: true
 
   - key: problem_date
+    find_hint: "the date the product failed or the refund was due"
+    ask_explicitly: true   # F32: model reused the purchase date as the problem date; this date starts the 2-year limit
     question: On what date did the problem happen, or the refund become due?
     question_hinglish: "Problem kis date ko hui, ya refund kab milna tha?"
     question_hi: "समस्या किस तारीख को हुई, या रिफंड कब मिलना था?"
