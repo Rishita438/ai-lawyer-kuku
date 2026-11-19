@@ -3,6 +3,8 @@
 #
 # required: true  -> the bot keeps asking until it has this (or the user says they don't know)
 # required_for_draft -> drafting a complaint/notice is BLOCKED until these are filled (ADR-009)
+# question_hinglish / question_hi: ready-written translations, chosen by CODE from the
+#   detected language (F27: the model kept asking in English after a Hinglish reply).
 # type: text | date | money | yesno | list   (tells the model what format to extract)
 # ask_explicitly: true -> code ignores this fact unless it was the question asked in that turn
 #                         (stops the model "assuming" important answers - see FAILURES F17)
@@ -16,18 +18,24 @@ opening_message: >
 fields:
   - key: product_or_service
     question: What did you buy or pay for?
+    question_hinglish: "Aapne kya khareeda tha, ya kis cheez/service ke liye paise diye the?"
+    question_hi: "आपने क्या खरीदा था, या किस चीज़/सेवा के लिए पैसे दिए थे?"
     type: text
     required: true
     required_for_draft: true
 
   - key: seller_name
     question: Who did you buy it from (shop, company or website/app)?
+    question_hinglish: "Aapne yeh kisse khareeda tha (dukaan, company ya website/app)?"
+    question_hi: "आपने यह किससे खरीदा था (दुकान, कंपनी या वेबसाइट/ऐप)?"
     type: text
     required: true
     required_for_draft: true
 
   - key: bought_online
     question: Did you buy it online (website/app) or from a physical shop?
+    question_hinglish: "Kya aapne yeh online (website/app) khareeda tha ya kisi dukaan se?"
+    question_hi: "क्या आपने यह ऑनलाइन (वेबसाइट/ऐप) खरीदा था या किसी दुकान से?"
     type: yesno
     hint: "true if online, false if a physical shop"
     required: true
@@ -35,30 +43,40 @@ fields:
 
   - key: amount_paid
     question: How much did you pay, in rupees?
+    question_hinglish: "Aapne kitne rupaye diye the?"
+    question_hi: "आपने कितने रुपये दिए थे?"
     type: money
     required: true
     required_for_draft: true
 
   - key: purchase_date
     question: When did you buy it (approximate date is fine)?
+    question_hinglish: "Aapne yeh kab khareeda tha (lagbhag date bhi chalegi)?"
+    question_hi: "आपने यह कब खरीदा था (लगभग तारीख भी चलेगी)?"
     type: date
     required: true
     required_for_draft: true
 
   - key: what_went_wrong
     question: What exactly went wrong, and when did you first notice it?
+    question_hinglish: "Exactly kya gadbad hui, aur aapko pehli baar kab pata chala?"
+    question_hi: "ठीक-ठीक क्या गड़बड़ हुई, और आपको पहली बार कब पता चला?"
     type: text
     required: true
     required_for_draft: true
 
   - key: problem_date
     question: On what date did the problem happen, or the refund become due?
+    question_hinglish: "Problem kis date ko hui, ya refund kab milna tha?"
+    question_hi: "समस्या किस तारीख को हुई, या रिफंड कब मिलना था?"
     type: date
     required: true
     required_for_draft: true
 
   - key: for_business_use
     question: Did you buy this for your own personal use, or to resell / use in a business?
+    question_hinglish: "Kya aapne yeh apne personal use ke liye liya tha, ya business / aage bechne ke liye?"
+    question_hi: "क्या आपने यह अपने निजी इस्तेमाल के लिए लिया था, या व्यापार / आगे बेचने के लिए?"
     type: yesno
     hint: "true if resale or business use, false if personal use"
     ask_explicitly: true   # only accepted when the user answers THIS question (F17: model assumed it)
@@ -67,24 +85,34 @@ fields:
 
   - key: complaints_made
     question: Have you already complained to the seller or platform? If yes, how and when, and what did they say?
+    question_hinglish: "Kya aapne seller ya platform ko pehle complain kiya hai? Agar haan, to kaise aur kab, aur unhone kya kaha?"
+    question_hi: "क्या आपने विक्रेता या प्लेटफ़ॉर्म से पहले शिकायत की है? अगर हाँ, तो कैसे और कब, और उन्होंने क्या कहा?"
     type: text
     required: true
     required_for_draft: false
 
   - key: evidence
     question: What proof do you have? (invoice/bill, order ID, payment screenshot, emails, chats, photos, warranty card)
+    question_hinglish: "Aapke paas kya proof hai? (bill/invoice, order ID, payment screenshot, emails, chats, photos, warranty card)"
+    question_hi: "आपके पास क्या सबूत है? (बिल/इनवॉइस, ऑर्डर आईडी, पेमेंट स्क्रीनशॉट, ईमेल, चैट, फ़ोटो, वारंटी कार्ड)"
     type: list
+    ask_explicitly: true   # F22: model copied the examples above into the case file as "evidence"
     required: true
     required_for_draft: true
 
   - key: desired_outcome
     question: What would you like - refund, replacement, repair, or compensation?
+    question_hinglish: "Aap kya chahte hain - refund, replacement, repair, ya compensation?"
+    question_hi: "आप क्या चाहते हैं - रिफंड, बदला हुआ सामान, मरम्मत, या मुआवज़ा?"
     type: text
+    ask_explicitly: true   # don't let the model assume "refund"
     required: true
     required_for_draft: true
 
   - key: user_city_state
     question: Which city and state do you live in? (This decides where you can file.)
+    question_hinglish: "Aap kis shehar aur state mein rehte hain? (Isse tay hota hai ki aap complaint kahan file kar sakte hain.)"
+    question_hi: "आप किस शहर और राज्य में रहते हैं? (इससे तय होता है कि आप शिकायत कहाँ दर्ज कर सकते हैं।)"
     type: text
     required: true
     required_for_draft: true
