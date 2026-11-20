@@ -1,0 +1,119 @@
+# Intake for the SECURITY DEPOSIT pack (residential rent). DATA, not code.
+# Same format as packs/consumer/intake.yaml - see that file for what each key means.
+# Personal details (names, addresses, bank details) are NEVER asked: documents use [PLACEHOLDERS].
+
+pack: deposit
+title: Security deposit not returned (rented home)
+amount_field: deposit_amount     # used by the shared 'high amount -> lawyer' rule
+opening_message: >
+  Tell me what happened with your security deposit, in your own words - English, Hindi or
+  Hinglish is fine. For example: how much deposit you paid, when you moved out, and what the
+  landlord is saying.
+
+fields:
+  - key: residential
+    question: Was this a home you lived in (not a shop, office or other business place)?
+    question_hinglish: "Kya yeh ghar tha jismein aap rehte the (dukaan, office ya business ki jagah nahi)?"
+    question_hi: "क्या यह घर था जिसमें आप रहते थे (दुकान, ऑफ़िस या कारोबार की जगह नहीं)?"
+    type: yesno
+    hint: "true if it was a home to live in, false if shop/office/business premises"
+    ask_explicitly: true
+    required: true
+    required_for_draft: true
+
+  - key: deposit_amount
+    question: How much security deposit did you pay, in rupees?
+    question_hinglish: "Aapne kitna security deposit diya tha, rupaye mein?"
+    question_hi: "आपने कितना सिक्योरिटी डिपॉज़िट दिया था, रुपये में?"
+    type: money
+    find_hint: "check your rent agreement or the payment receipt"
+    required: true
+    required_for_draft: true
+
+  - key: amount_returned
+    question: How much of the deposit has the landlord returned so far? (Say 0 if nothing.)
+    question_hinglish: "Makaan maalik ne ab tak deposit mein se kitna wapas kiya hai? (Kuch nahi to 0 boliye.)"
+    question_hi: "मकान मालिक ने अब तक डिपॉज़िट में से कितना वापस किया है? (कुछ नहीं तो 0 बोलिए।)"
+    type: money
+    hint: "0 is a valid answer if nothing was returned"
+    find_hint: "check your bank or UPI statement"
+    ask_explicitly: true
+    required: true
+    required_for_draft: true
+
+  - key: monthly_rent
+    question: What was the monthly rent?
+    question_hinglish: "Mahine ka kiraya kitna tha?"
+    question_hi: "महीने का किराया कितना था?"
+    type: money
+    required: true
+    required_for_draft: false
+
+  - key: move_out_date
+    question: On what date did you move out and hand back the house and keys?
+    question_hinglish: "Aapne kis date ko ghar khaali karke chaabi wapas di thi?"
+    question_hi: "आपने किस तारीख को घर खाली करके चाबी वापस दी थी?"
+    type: date
+    find_hint: "the date you handed back the keys"
+    ask_explicitly: true
+    required: true
+    required_for_draft: true
+
+  - key: agreement
+    question: Do you have a written rent agreement? If yes, what does it say about returning the deposit?
+    question_hinglish: "Kya aapke paas likhit rent agreement hai? Agar haan, to usmein deposit wapas karne ke baare mein kya likha hai?"
+    question_hi: "क्या आपके पास लिखित किराया अनुबंध है? अगर हाँ, तो उसमें डिपॉज़िट वापस करने के बारे में क्या लिखा है?"
+    type: text
+    required: true
+    required_for_draft: false
+
+  - key: landlord_reason
+    question: What reason has the landlord given for not returning it (for example damage, unpaid rent or bills), if any?
+    question_hinglish: "Makaan maalik ne deposit na lautane ki kya wajah batayi hai (jaise nuksaan, baaki kiraya ya bill), agar koi?"
+    question_hi: "मकान मालिक ने डिपॉज़िट न लौटाने की क्या वजह बताई है (जैसे नुकसान, बकाया किराया या बिल), अगर कोई?"
+    type: text
+    required: true
+    required_for_draft: false
+
+  - key: handover_proof
+    question: Do you have proof that you handed back the house in good condition (photos, video, a message or a handover note)?
+    question_hinglish: "Kya aapke paas saboot hai ki aapne ghar theek haalat mein wapas kiya (photo, video, message ya handover note)?"
+    question_hi: "क्या आपके पास सबूत है कि आपने घर ठीक हालत में वापस किया (फ़ोटो, वीडियो, मैसेज या हैंडओवर नोट)?"
+    type: text
+    ask_explicitly: true
+    required: true
+    required_for_draft: false
+
+  - key: complaints_made
+    question: Have you already asked the landlord for the deposit? If yes, how and when, and what did they say?
+    question_hinglish: "Kya aapne makaan maalik se deposit maanga hai? Agar haan, to kaise aur kab, aur unhone kya kaha?"
+    question_hi: "क्या आपने मकान मालिक से डिपॉज़िट माँगा है? अगर हाँ, तो कैसे और कब, और उन्होंने क्या कहा?"
+    type: text
+    required: true
+    required_for_draft: true
+
+  - key: evidence
+    question: What proof do you have? (rent agreement, deposit receipt, bank/UPI transfer, rent receipts, chats, photos)
+    question_hinglish: "Aapke paas kya saboot hai? (rent agreement, deposit ki rasid, bank/UPI transfer, kiraye ki rasid, chats, photos)"
+    question_hi: "आपके पास क्या सबूत है? (किराया अनुबंध, डिपॉज़िट की रसीद, बैंक/UPI ट्रांसफ़र, किराये की रसीद, चैट, फ़ोटो)"
+    type: list
+    ask_explicitly: true
+    required: true
+    required_for_draft: true
+
+  - key: desired_outcome
+    question: Do you want the full deposit back, or the deposit minus a deduction you agree with?
+    question_hinglish: "Aapko poora deposit wapas chahiye, ya kisi katauti ke baad jo aapko theek lagti hai?"
+    question_hi: "आपको पूरा डिपॉज़िट वापस चाहिए, या किसी कटौती के बाद जो आपको ठीक लगती है?"
+    type: text
+    ask_explicitly: true
+    required: true
+    required_for_draft: true
+
+  - key: user_city_state
+    question: In which city and state was the rented house?
+    question_hinglish: "Kiraye ka ghar kis shehar aur state mein tha?"
+    question_hi: "किराये का घर किस शहर और राज्य में था?"
+    type: text
+    required: true
+    required_for_draft: true

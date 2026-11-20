@@ -8,6 +8,7 @@ config.yaml, not in code. (Decision D3 / ADR-010.)
 import json
 import os
 import re
+import time
 from pathlib import Path
 
 import yaml
@@ -17,6 +18,7 @@ from openai import OpenAI
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")                       # reads API keys from .env into the environment
 CONFIG = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))
+CALLS: list[str] = []          # which model answered each call (main or fallback) - read by the test harness
 
 
 def _client(cfg: dict) -> OpenAI:
@@ -30,32 +32,55 @@ def _client(cfg: dict) -> OpenAI:
                   timeout=CONFIG.get("timeout_seconds", 30), max_retries=1)
 
 
+# F54: when a model says "rate limited", remember it for a while instead of hitting it on every call.
+_COOLDOWN: dict[str, float] = {}       # model name -> time.time() until which we skip it
+MAX_WAIT_SECONDS = 20                  # a short "try again in Xs" is worth waiting for
+
+
+def _retry_after(err: Exception) -> float | None:
+    m = re.search(r"try again in ([\d.]+)\s*(ms|s)", str(err))
+    if not m:
+        return None
+    return float(m.group(1)) / (1000 if m.group(2) == "ms" else 1)
+
+
 def chat(messages: list[dict], temperature: float | None = None) -> str:
     """Send a list of {"role": ..., "content": ...} messages; return the reply text.
-    Tries the main model first, then the fallback model if one is configured."""
+    Tries the main model first, then the fallback model. Rate limits (F54):
+      - "try again in 0.7s" (per-minute limit) -> wait that long and retry the same model, up to 3 times
+      - a 429 with no wait time (e.g. daily quota used up) -> skip that model for 5 minutes"""
     temp = CONFIG.get("temperature", 0.2) if temperature is None else temperature
     attempts = [CONFIG] + ([CONFIG["fallback"]] if CONFIG.get("fallback", {}).get("model") else [])
+    attempts = [c for i, c in enumerate(attempts) if i == 0 or os.getenv(c["api_key_env"])]
+    usable = [c for c in attempts if _COOLDOWN.get(c["model"], 0) <= time.time()] or attempts
     last_error = None
-    for i, cfg in enumerate(attempts):
-        if i > 0 and not os.getenv(cfg["api_key_env"]):
-            print(f"[llm] fallback {cfg['model']} skipped: no {cfg['api_key_env']} in .env")
-            continue
-        try:
-            resp = _client(cfg).chat.completions.create(
-                model=cfg["model"], messages=messages, temperature=temp)
-            return resp.choices[0].message.content or ""
-        except Exception as err:            # rate limit, outage, missing key...
-            last_error = err
-            hint = ""
-            if "404" in str(err):
-                hint = " -> model name not found (renamed or shut down?). Run: py scripts\\test_llm.py --list"
-            elif "429" in str(err):
-                hint = " -> rate limit / free-tier quota hit. Wait a minute or use the fallback."
-            elif "503" in str(err) or "500" in str(err):
-                hint = " -> provider's servers busy/down. Try a -lite model or set up the fallback."
-            elif "401" in str(err) or "403" in str(err):
-                hint = " -> API key rejected. Check the key in .env."
-            print(f"[llm] {cfg['model']} failed: {err}{hint}")
+    for cfg in usable:
+        for _ in range(3):
+            try:
+                resp = _client(cfg).chat.completions.create(
+                    model=cfg["model"], messages=messages, temperature=temp)
+                CALLS.append(cfg["model"])
+                return resp.choices[0].message.content or ""
+            except Exception as err:            # rate limit, outage, missing key...
+                last_error, text = err, str(err)
+                if "429" in text:
+                    wait = _retry_after(err)
+                    if wait is not None and wait <= MAX_WAIT_SECONDS:
+                        print(f"[llm] {cfg['model']} rate-limited, waiting {wait:.1f}s and retrying")
+                        time.sleep(wait + 0.5)
+                        continue
+                    _COOLDOWN[cfg["model"]] = time.time() + 300
+                    print(f"[llm] {cfg['model']} quota used up -> skipping it for 5 minutes")
+                    break
+                hint = ""
+                if "404" in text:
+                    hint = " -> model name not found (renamed or shut down?). Run: py scripts\\test_llm.py --list"
+                elif "503" in text or "500" in text:
+                    hint = " -> provider's servers busy/down. Try a -lite model or set up the fallback."
+                elif "401" in text or "403" in text:
+                    hint = " -> API key rejected. Check the key in .env."
+                print(f"[llm] {cfg['model']} failed: {err}{hint}")
+                break
     raise RuntimeError(f"All models failed. Last error: {last_error}")
 
 

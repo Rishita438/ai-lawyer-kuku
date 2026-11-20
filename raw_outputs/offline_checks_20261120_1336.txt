@@ -1,0 +1,222 @@
+Offline checks - 2026-11-20T13:35:57
+
+===== check_kb.py (OK) =====
+_shared: 3 entries, 0 unverified, 0 reviewed, 0 errors
+consumer: 13 entries, 0 unverified, 0 reviewed, 0 errors
+deposit: 4 entries, 0 unverified, 1 reviewed, 0 errors
+notice: 2 entries, 0 unverified, 1 reviewed, 0 errors
+salary: 4 entries, 0 unverified, 1 reviewed, 0 errors
+
+===== test_stage4.py (OK) =====
+
+== 1. Calculators (code, from verified KB numbers) ==
+PASS  time limit ok, deadline 2028-10-26   ({'name': 'time_limit', 'kb_ids': ['CPA2019-S69'], 'years': 2, 'status': 'ok', 'start': '2026-10-26', 'deadline': '2028-10-26', 'days_left': 707, 'display': '⏳ **Time limit:** ✅ within the limit. Normally file by **2028-10-26** (2 years from 2026-10-26; dates are approximate).'})
+PASS  District Commission for Rs 15,000
+PASS  fee is nil up to Rs 5 lakh
+PASS  fee Rs 400 for Rs 12 lakh
+PASS  fee Rs 7500 above Rs 10 crore
+PASS  State Commission for Rs 60 lakh
+PASS  Rs 48 lakh flagged near boundary
+PASS  time limit passed (problem in 2024-10)
+PASS  time limit near (problem 2024-12-10)
+PASS  unknown date -> unknown, not a guess
+
+== 2. Escalation rules (code, always fire) ==
+PASS  'police ne FIR darj ki hai' -> criminal   (got criminal)
+PASS  'mujhe cheque bounce ka notice aaya hai' -> criminal   (got criminal)
+PASS  'पुलिस घर आई थी' -> criminal   (got criminal)
+PASS  'court se summons aaya hai' -> court_or_official   (got court_or_official)
+PASS  'divorce ke baare me batao' -> out_of_scope   (got out_of_scope)
+PASS  'pati maarpeet karta hai' -> safety   (got safety)
+PASS  'flipkart refund nahi de raha' -> None   (got None)
+PASS  'my order 420 rupees ka tha' -> criminal   (got criminal)
+PASS  business use -> stop consumer analysis
+PASS  time-barred -> lawyer flagged
+
+== 3. Validator vs a deliberately BAD model answer ==
+PASS  typed 'Section 2(7)' removed
+PASS  typed act name removed
+PASS  invented case law point dropped
+PASS  uncited IPC point dropped
+PASS  invented kb_id 'FAKE-ID' removed
+PASS  '30 days' (not in KB) removed
+PASS  '48 hours' (in verified KB) kept
+PASS  'Rule 4(5)' typed by model removed
+PASS  'you will win' removed
+PASS  promise 'aapko pakka refund milega' removed
+PASS  promise '100% chance hai' removed
+PASS  promise 'आपको ज़रूर मिलेगा' removed
+PASS  normal 'you may get a refund' kept
+      -> validator removed 9 item(s): invented_kb_id, legal_reference, number, promised_outcome, uncited_point_dropped
+
+== 4. Rendered answer for the bad model (what the user would see) ==
+
+### Where you stand
+
+Under [removed: unverified legal reference] of the [removed: unverified legal reference] you are a consumer and [removed: nobody can promise a legal outcome].
+
+- Flipkart must reply within 48 hours and fix it within one month.<br><small>📘 **Consumer Protection (E-Commerce) Rules, 2020, Rule 4(4)-(5)**: E-commerce grievance officer — [source](https://egazette.gov.in/WriteReadData/2020/220661.pdf) (✅ verified 2026-11-19)</small>
+
+- You must file within [removed: unverified number].<br><small>📘 **Consumer Protection Act, 2019, s. 69**: Time limit for filing a complaint — [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (✅ verified 2026-11-19)</small>
+
+#### Key facts (calculated by the app, not the AI)
+
+⏳ **Time limit:** ✅ within the limit. Normally file by **2028-10-26** (2 years from 2026-10-26; dates are approximate).
+
+🏛️ **Which Commission:** District Consumer Commission, for Rs 15,000 paid (you can file where you live or work: Rohtak, Haryana).
+
+💰 **Filing fee:** nil (no fee).
+
+<small>Based on: 📘 **Consumer Protection Act, 2019, s. 34**: District Commission - which one you can file in — [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (✅ verified 2026-11-19); 📘 **Consumer Protection Act, 2019, s. 69**: Time limit for filing a complaint — [source](https://indiacode.gov.in/act/1b6c1754-47b1-411e-9607-1712a9caf368/sections) (✅ verified 2026-11-19); 📘 **Consumer Protection (Consumer Disputes Redressal Commissions) Rules, 2020, Rule 7 (fee table)**: Fee for filing a consumer complaint — [source](https://egazette.gov.in/WriteReadData/2023/248158.pdf) (✅ verified 2026-11-19); 📘 **Consumer Protection (Jurisdiction of the District Commission, the State Commission and the National Commission) Rules, 2021, Rules 3-5**: Money limits - which Commission — [source](https://www.pib.gov.in/PressReleasePage.aspx?PRID=1786342) (✅ verified 2026-11-19)</small>
+
+### Your options
+
+**1. Complain to the grievance officer** — fastest
+   - Email them citing [removed: unverified legal reference]
+   - Wait 48 hours
+
+   <small>📘 **Consumer Protection (E-Commerce) Rules, 2020, Rule 4(4)-(5)**: E-commerce grievance officer — [source](https://egazette.gov.in/WriteReadData/2020/220661.pdf) (✅ verified 2026-11-19)</small>
+
+### What I'm not sure about
+- Whether the warranty covers water damage.
+
+---
+<small>Knowledge base last verified: 2026-11-19. Only verified sources are cited. The safety checker removed 9 unverified item(s) from the AI's draft. This is general information, not legal advice.</small>
+
+33/33 checks passed
+
+===== test_stage5.py (OK) =====
+
+== 1. Complaint with a well-behaved model ==
+PASS  model paragraph accepted   ([])
+PASS  citations come from the verified KB
+PASS  name/address are placeholders, never invented
+PASS  district left as placeholder (not guessed)
+PASS  state taken from user's answer
+PASS  placeholders listed for the user   ([DATE], [DISTRICT NAME], [OPPOSITE PARTY'S REGISTERED ADDRESS – see your invoice or the website's legal/contact page], [PLACE], [SIGNATURE OF COMPLAINANT], [YOUR FULL ADDRESS], [YOUR FULL NAME])
+PASS  explanation in Hinglish
+
+== 2. Model invents a date, an amount and a section ==
+PASS  paragraph rejected   (model paragraph rejected -> plain version used: number not in case file: 12; number not in case file: 18000; number not in case file: 9; legal reference: Section 2(9))
+PASS  invented date not in document
+PASS  invented amount not in document
+PASS  typed section not in document
+PASS  plain version uses the real facts
+
+== 3. Model unavailable (503) ==
+PASS  letter still produced from facts   (model unavailable (Error code: 503) -> plain version used)
+PASS  e-commerce rule cited from KB with verified numbers
+
+== 4. Gates ==
+PASS  unknown purchase date -> complaint locked   (When did you buy it (approximate date is fine)? (tip: check your invoice or order history))
+PASS  ...but grievance letter still allowed
+PASS  ...with a placeholder, not a guess
+PASS  shop purchase -> no e-commerce letter offered
+PASS  time limit passed -> complaint locked
+PASS  business use -> complaint locked
+
+== 5. The complaint as the user would download it ==
+
+**BEFORE THE DISTRICT CONSUMER DISPUTES REDRESSAL COMMISSION, [DISTRICT NAME], HARYANA**
+
+Consumer Complaint No. ______ of ______ (to be filled by the Commission)
+
+**Complainant:**
+[YOUR FULL NAME], [YOUR FULL ADDRESS], Rohtak, Haryana
+
+**Versus**
+
+**Opposite Party:**
+Flipkart, [OPPOSITE PARTY'S REGISTERED ADDRESS – see your invoice or the website's legal/contact page]
+
+---
+
+**COMPLAINT**
+
+**1. Facts of the case**
+
+1. On 19 September 2026, I purchased a Redmi phone from Flipkart for Rs 15,000.
+
+2. On 26 October 2026, the phone stopped working.
+
+3. I complained to Flipkart customer care but received no response.
+
+**2. Jurisdiction**
+
+(a) The value of the goods/services paid as consideration is Rs 15,000, which is within the limit of this Commission (Rules 3-5 of the Consumer Protection (Jurisdiction of the District Commission, the State Commission and the National Commission) Rules, 2021).
+
+(b) The Complainant resides/personally works for gain at Rohtak, Haryana, within the area of this Commission (Section 34 of the Consumer Protection Act, 2019).
+
+**3. Limitation**
+
+The cause of action arose on or about 26 October 2026. This complaint is filed within the period allowed (Section 69 of the Consumer Protection Act, 2019).
+
+**4. Relief sought**
+
+The Complainant respectfully requests this Commission to direct the Opposite Party to:
+(a) grant the following relief: a full refund;
+(b) pay such compensation and costs as this Commission considers just (Section 39 of the Consumer Protection Act, 2019).
+
+**5. List of documents**
+
+1. invoice
+2. order ID
+3. chat screenshots
+
+**Verification**
+
+I, [YOUR FULL NAME], the Complainant, state that the contents of this complaint are true and correct to the best of my knowledge and belief, and nothing material has been concealed.
+
+Place: [PLACE]
+Date: [DATE]
+
+[SIGNATURE OF COMPLAINANT]
+
+
+20/20 checks passed
+
+===== test_packs.py (OK) =====
+
+== Deposit pack (full) ==
+PASS  amount due = 50,000 - 10,000
+PASS  no deadline DATE computed (start not verified)
+PASS  deposit > 2x rent -> Model Act shown as background only
+PASS  shop/office -> stop
+PASS  returned > deposit -> numbers flagged
+PASS  31 months since move-out -> lawyer
+PASS  notice offered when facts complete
+PASS  notice works even with model down
+PASS  landlord's name never invented
+PASS  nothing due -> notice locked
+
+== Salary pack (basics) ==
+PASS  still employed -> monthly 7th rule shown
+PASS  left the job -> two working days rule
+PASS  unpaid since Aug 2025 -> old-law caveat + lawyer
+PASS  government job -> stop
+PASS  no wage-claim deadline date computed
+PASS  still employed -> 'last working day' skipped
+PASS  salary pack has no documents (light)
+
+== Notice pack (basics) ==
+PASS  court/police/govt notice -> stop
+PASS  private notice explained as a demand, not a court order
+PASS  deadline in 3 days -> urgent + lawyer
+PASS  deadline passed -> flagged
+PASS  no deadline -> 'don't ignore it'
+PASS  opening story is ALWAYS keyword-checked (F35)
+PASS  reply to the official-sender question skips keywords (negation)
+
+== Key facts box: deposit ==
+
+💰 **Amount still due:** Rs 40,000 (deposit Rs 50,000 - returned Rs 10,000).
+
+⏳ **Time:** about 2 month(s) since you moved out. Most money claims must generally be filed in court within 3 years, but when that period starts depends on the facts - this assistant does not calculate an exact deadline.
+
+ℹ️ **Background:** your deposit was more than two months' rent. The national *Model* Tenancy Act suggests a two-month cap for homes, but it binds only if your state has passed a law based on it - check your state's rent law.
+
+🏠 **Note:** rent law is mostly state law. This assistant covers only general central law (contract and time limits), not your state's rent act.
+
+<small>Based on: 📘 **Indian Contract Act, 1872, s. 73**: Compensation when a contract is broken — [source](https://indiacode.gov.in/act/0e782442-f035-4d53-aace-81b1552a8cf2/sections?spc.rpp=10&spc.sf=dc.date.issued&spc.sd=DESC&spc.page=8) (✅ verified 2026-11-19); 📘 **Limitation Act, 1963, Schedule (Articles 7, 22, 55, 113 as examples)**: Time limit to sue for money — [source](https://indiacode.gov.in/server/api/core/bitstreams/ad4711f7-2ef9-41c3-8b7a-30050493cbb2/content) (✅ verified 2026-11-19); 📘 **Model Tenancy Act, 2021, s. 11**: Security deposit cap and refund (ONLY in states that adopted it) — [source](https://www.mohua.gov.in/static/uploads/2025/11/9ada3e2d46992be72cabf7028d633b87.pdf) (✅ verified 2026-11-19)</small>
+
+24/24 checks passed

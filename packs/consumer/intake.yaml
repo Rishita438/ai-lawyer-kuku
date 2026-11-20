@@ -11,13 +11,16 @@
 #                         (stops the model "assuming" important answers - see FAILURES F17)
 
 pack: consumer
+amount_field: amount_paid      # used by the shared 'high amount -> lawyer' rule
 title: Consumer refund / defective product or service
 opening_message: >
   Tell me what happened, in your own words - English, Hindi or Hinglish is fine.
   For example: what you bought, from whom, and what went wrong.
 
 fields:
+  # Questions that can END the case (business use) come early, so nobody answers 10 questions for nothing (F47).
   - key: product_or_service
+    capitalise: true
     find_hint: "the product name on your invoice"
     question: What did you buy or pay for?
     question_hinglish: "Aapne kya khareeda tha, ya kis cheez/service ke liye paise diye the?"
@@ -27,6 +30,7 @@ fields:
     required_for_draft: true
 
   - key: seller_name
+    capitalise: true
     find_hint: "the seller/platform name on your invoice"
     question: Who did you buy it from (shop, company or website/app)?
     question_hinglish: "Aapne yeh kisse khareeda tha (dukaan, company ya website/app)?"
@@ -34,6 +38,16 @@ fields:
     type: text
     required: true
     required_for_draft: true
+
+  - key: for_business_use
+    question: Did you buy this for your own personal use, or to resell / use in a business?
+    question_hinglish: "Kya aapne yeh apne personal use ke liye liya tha, ya business / aage bechne ke liye?"
+    question_hi: "क्या आपने यह अपने निजी इस्तेमाल के लिए लिया था, या व्यापार / आगे बेचने के लिए?"
+    type: yesno
+    hint: "true if resale or business use, false if personal use"
+    ask_explicitly: true   # only accepted when the user answers THIS question (F17: model assumed it)
+    required: true
+    required_for_draft: false
 
   - key: bought_online
     question: Did you buy it online (website/app) or from a physical shop?
@@ -79,16 +93,6 @@ fields:
     type: date
     required: true
     required_for_draft: true
-
-  - key: for_business_use
-    question: Did you buy this for your own personal use, or to resell / use in a business?
-    question_hinglish: "Kya aapne yeh apne personal use ke liye liya tha, ya business / aage bechne ke liye?"
-    question_hi: "क्या आपने यह अपने निजी इस्तेमाल के लिए लिया था, या व्यापार / आगे बेचने के लिए?"
-    type: yesno
-    hint: "true if resale or business use, false if personal use"
-    ask_explicitly: true   # only accepted when the user answers THIS question (F17: model assumed it)
-    required: true
-    required_for_draft: false
 
   - key: complaints_made
     question: Have you already complained to the seller or platform? If yes, how and when, and what did they say?

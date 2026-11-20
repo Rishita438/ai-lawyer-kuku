@@ -4,6 +4,7 @@ render.py - turns the analysis into what the user reads. Plain code, no AI.
 Citations are built HERE from the KB (act, section, title, link, verified date) -
 the model only ever supplied ids. So a citation on screen cannot be invented.
 """
+import re
 from html import escape
 
 
@@ -27,46 +28,12 @@ def _sec(e: dict) -> str:
     return s if s.lower().startswith(("rule", "sched")) else f"s. {s}"
 
 
-def _rupees(n) -> str:
-    """Indian-style grouping: 1500000 -> 15,00,000."""
-    s = str(int(n))
-    if len(s) <= 3:
-        return s
-    head, tail = s[:-3], s[-3:]
-    groups = []
-    while len(head) > 2:
-        groups.insert(0, head[-2:]); head = head[:-2]
-    return ",".join([head] + groups + [tail]) if head else ",".join(groups + [tail])
-
-
 def computed_facts_md(calcs: list[dict], kb: dict) -> str:
-    """The calculator box. Deterministic text, no model involved."""
-    c = {x["name"]: x for x in calcs}
-    lines = []
-    t = c["time_limit"]
-    if t["status"] == "unknown":
-        lines.append("⏳ **Time limit:** can't calculate - the date the problem arose is unknown. "
-                     "The normal limit is 2 years from that date.")
-    elif t["status"] == "date_in_future":
-        lines.append("⏳ **Time limit:** the problem date given is in the future - please check it.")
-    else:
-        word = {"ok": "✅ within the limit", "near": "⚠️ close to the limit", "passed": "❌ may have passed"}[t["status"]]
-        lines.append(f"⏳ **Time limit:** {word}. Normally file by **{t['deadline']}** "
-                     f"(2 years from {t['start']}; dates are approximate).")
-    f = c["forum"]
-    if f["status"] == "unknown":
-        lines.append("🏛️ **Which Commission:** unknown - amount paid not given.")
-    else:
-        where = f" (you can file where you live or work: {f['where']})" if f.get("where") not in (None, "unknown") else ""
-        warn = " ⚠️ close to a limit - confirm with a lawyer" if f["status"] == "near_boundary" else ""
-        lines.append(f"🏛️ **Which Commission:** {f['level']} Consumer Commission, for Rs {_rupees(f['amount'])} paid{where}.{warn}")
-    fee = c["filing_fee"]
-    if fee["status"] == "ok":
-        lines.append(f"💰 **Filing fee:** {'nil (no fee)' if fee['fee'] == 0 else 'Rs ' + _rupees(fee['fee'])}.")
-    else:
-        lines.append("💰 **Filing fee:** unknown - amount paid not given.")
-    ids = sorted({i for x in calcs for i in x["kb_ids"] if i in kb["entries"]})
-    lines.append("<small>Based on: " + "; ".join(citation(kb, i) for i in ids) + "</small>")
+    """The "Key facts" box: each pack calculator supplies its own display line. No model involved."""
+    lines = [c["display"] for c in calcs if c.get("display")]
+    ids = sorted({i for c in calcs if c.get("display") for i in c.get("kb_ids", []) if i in kb["entries"]})
+    if ids:
+        lines.append("<small>Based on: " + "; ".join(citation(kb, i) for i in ids) + "</small>")
     return "\n\n".join(lines)
 
 
@@ -91,8 +58,10 @@ def analysis_md(result: dict) -> str:
             refs = "<br>".join(citation(kb, i) for i in p["kb_ids"])
             out.append(f"- {_m(p['text'])}<br><small>{refs}</small>")
 
-    out.append("#### Key facts (calculated by the app, not the AI)")
-    out.append(computed_facts_md(result["calcs"], kb))
+    facts_box = computed_facts_md(result["calcs"], kb)
+    if facts_box:
+        out.append("#### Key facts (calculated by the app, not the AI)")
+        out.append(facts_box)
 
     if a and a["options"]:
         out.append("### Your options")
@@ -103,9 +72,12 @@ def analysis_md(result: dict) -> str:
                 block += "\n\n   <small>" + "<br>".join(citation(kb, i) for i in o["kb_ids"]) + "</small>"
             out.append(block)
 
-    lawyer = [e["reason"] for e in result["escalations"]]
+    lawyer = list(dict.fromkeys(e["reason"] for e in result["escalations"]))       # F50: no duplicate bullets
     if a and a.get("suggest_lawyer") and a.get("lawyer_reason"):
-        lawyer.append(_m(a["lawyer_reason"]))
+        mine = _m(a["lawyer_reason"])
+        norm = lambda t: re.sub(r"\W+", " ", t.lower()).strip()
+        if not any(norm(mine)[:60] in norm(r) or norm(r)[:60] in norm(mine) for r in lawyer):
+            lawyer.append(mine)
     if lawyer:
         out.append("### ⚖️ When to get a real lawyer\n" + "\n".join(f"- {r}" for r in lawyer)
                    + "\n- Free legal help may be available: District Legal Services Authority / NALSA helpline **15100**.")

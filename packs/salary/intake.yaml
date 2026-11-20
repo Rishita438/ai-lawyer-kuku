@@ -1,0 +1,82 @@
+# Intake for the UNPAID SALARY pack (light pack: analysis only, no documents yet). DATA, not code.
+
+pack: salary
+title: Unpaid salary (private job) - basics
+amount_field: amount_due
+opening_message: >
+  Tell me about your unpaid salary, in your own words - English, Hindi or Hinglish is fine.
+  For example: who you work(ed) for, how many months are unpaid, and roughly how much.
+
+fields:
+  - key: employer_name
+    question: What is the name of your employer (company or person)?
+    question_hinglish: "Aapke employer (company ya vyakti) ka naam kya hai?"
+    question_hi: "आपके नियोक्ता (कंपनी या व्यक्ति) का नाम क्या है?"
+    type: text
+    capitalise: true
+    required: true
+
+  - key: govt_job
+    question: Is this a government job (central or state government)?
+    question_hinglish: "Kya yeh sarkari naukri hai (central ya state government)?"
+    question_hi: "क्या यह सरकारी नौकरी है (केंद्र या राज्य सरकार)?"
+    type: yesno
+    hint: "true if a government job, false if private"
+    ask_explicitly: true
+    required: true
+
+  - key: still_employed
+    question: Are you still working there?
+    question_hinglish: "Kya aap abhi bhi wahan kaam kar rahe hain?"
+    question_hi: "क्या आप अभी भी वहाँ काम कर रहे हैं?"
+    type: yesno
+    ask_explicitly: true
+    required: true
+
+  - key: last_working_day
+    question: What was your last working day there?
+    question_hinglish: "Wahan aapka aakhri working din kaunsa tha?"
+    question_hi: "वहाँ आपका आख़िरी कार्य-दिवस कौन-सा था?"
+    type: date
+    skip_if: {still_employed: true}
+    ask_explicitly: true
+    required: true
+
+  - key: unpaid_since
+    question: From which month has your salary not been paid?
+    question_hinglish: "Kis mahine se aapki salary nahi mili hai?"
+    question_hi: "किस महीने से आपकी तनख़्वाह नहीं मिली है?"
+    type: date
+    hint: "use the 1st of that month"
+    ask_explicitly: true
+    required: true
+
+  - key: amount_due
+    question: How much salary is unpaid in total, in rupees (approximate is fine)?
+    question_hinglish: "Kul kitni salary baaki hai, rupaye mein (lagbhag bhi chalega)?"
+    question_hi: "कुल कितनी तनख़्वाह बाक़ी है, रुपये में (लगभग भी चलेगा)?"
+    type: money
+    find_hint: "add up from your payslips or offer letter"
+    required: true
+
+  - key: complaints_made
+    question: Have you asked your employer for the salary? If yes, how and when, and what did they say?
+    question_hinglish: "Kya aapne employer se salary maangi hai? Agar haan, to kaise aur kab, aur unhone kya kaha?"
+    question_hi: "क्या आपने नियोक्ता से तनख़्वाह माँगी है? अगर हाँ, तो कैसे और कब, और उन्होंने क्या कहा?"
+    type: text
+    required: true
+
+  - key: evidence
+    question: What proof do you have? (offer/appointment letter, payslips, bank statements, attendance records, emails or chats)
+    question_hinglish: "Aapke paas kya saboot hai? (offer/appointment letter, payslips, bank statement, attendance record, emails ya chats)"
+    question_hi: "आपके पास क्या सबूत है? (ऑफ़र/नियुक्ति पत्र, सैलरी स्लिप, बैंक स्टेटमेंट, हाज़िरी रिकॉर्ड, ईमेल या चैट)"
+    type: list
+    ask_explicitly: true
+    required: true
+
+  - key: user_city_state
+    question: In which city and state is (or was) your workplace?
+    question_hinglish: "Aapka kaam ki jagah kis shehar aur state mein hai (ya thi)?"
+    question_hi: "आपके काम की जगह किस शहर और राज्य में है (या थी)?"
+    type: text
+    required: true

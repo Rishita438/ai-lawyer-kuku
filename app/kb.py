@@ -27,6 +27,9 @@ def load_kb(pack: str) -> dict:
 def load_calculators(pack: str):
     """Import packs/<pack>/calculators.py (pure functions, no AI)."""
     path = ROOT / "packs" / pack / "calculators.py"
+    if not path.exists():                      # a pack may have no calculators at all
+        import types
+        return types.SimpleNamespace(run_all=lambda facts, today=None: [])
     spec = importlib.util.spec_from_file_location(f"calc_{pack}", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

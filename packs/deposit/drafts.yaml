@@ -1,0 +1,27 @@
+# Documents for the SECURITY DEPOSIT pack. Same format as packs/consumer/drafts.yaml.
+
+documents:
+  - id: deposit_notice
+    title: Notice to the landlord demanding the deposit back
+    template: templates/deposit_notice.md
+    requires_full_case: true
+    narrative_fields: [user_city_state, deposit_amount, amount_returned, move_out_date, landlord_reason, handover_proof, complaints_made]
+    must_mention: deposit_amount
+    explain_en: >
+      A written notice to your landlord asking for the deposit back by a deadline you choose. This is
+      general practice, not a legal requirement, and you can send it yourself - a lawyer is not
+      required. Send it by speed post or registered post (keep the receipt) and also by WhatsApp or
+      email, and keep copies. If it is not paid, talk to a lawyer or your District Legal Services
+      Authority about next steps, which depend on your state's law.
+    explain_hinglish: >
+      Yeh makaan maalik ko ek likhit notice hai jismein aap apni chuni hui deadline tak deposit wapas
+      maangte hain. Yeh aam taur par kiya jaata hai, kanooni zaroorat nahi hai, aur aap ise khud bhej
+      sakte hain - vakil zaroori nahi. Ise speed post ya registered post se bhejiye (rasid rakhiye) aur
+      WhatsApp ya email se bhi, aur copies rakhiye. Agar paisa nahi milta, to aage ke kadam ke liye vakil
+      ya District Legal Services Authority se baat kijiye - yeh aapke state ke kanoon par nirbhar karta hai.
+    explain_hi: >
+      यह मकान मालिक को एक लिखित नोटिस है जिसमें आप अपनी चुनी हुई समय-सीमा तक डिपॉज़िट वापस माँगते हैं।
+      यह आम तौर पर किया जाता है, कानूनी ज़रूरत नहीं है, और आप इसे ख़ुद भेज सकते हैं - वकील ज़रूरी नहीं।
+      इसे स्पीड पोस्ट या रजिस्टर्ड पोस्ट से भेजिए (रसीद रखिए) और WhatsApp या ईमेल से भी, और कॉपी रखिए।
+      अगर पैसा नहीं मिलता, तो आगे के कदम के लिए वकील या ज़िला विधिक सेवा प्राधिकरण से बात कीजिए - यह
+      आपके राज्य के कानून पर निर्भर करता है।

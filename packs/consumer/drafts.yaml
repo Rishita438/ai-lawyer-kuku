@@ -1,5 +1,6 @@
 # Documents this pack can draft (Stage 5). DATA, not code: a lawyer can edit templates/wording.
 #
+# narrative_fields: facts the AI may use for the facts paragraph; must_mention: a fact it must include
 # requires_full_case: true -> only offered when every required_for_draft fact is a real value
 #                             (a formal complaint must not be filed on unknown facts)
 # explain_*: shown with the draft, in the user's language (documents themselves are in English,
@@ -11,6 +12,8 @@ documents:
     template: templates/grievance_letter.md
     requires_full_case: false
     only_if: {bought_online: true}
+    narrative_fields: [product_or_service, seller_name, bought_online, amount_paid, purchase_date, what_went_wrong, problem_date, complaints_made, for_business_use]
+    must_mention: seller_name
     explain_en: >
       A formal written complaint to the online platform's grievance officer. Send it by email
       (find the grievance officer's contact on the platform's website or app) and keep a copy.
@@ -29,6 +32,8 @@ documents:
     title: Draft complaint to the District Consumer Commission
     template: templates/complaint.md
     requires_full_case: true
+    narrative_fields: [product_or_service, seller_name, bought_online, amount_paid, purchase_date, what_went_wrong, problem_date, complaints_made, for_business_use]
+    must_mention: seller_name
     explain_en: >
       A first draft of a consumer complaint. File it online on e-Jagriti and follow the
       portal's instructions - it may ask for more details or documents. Read every line, fill

@@ -14,6 +14,7 @@ from datetime import date
 
 from app import llm
 from app.kb import load_kb, load_calculators
+from app.case_file import load_intake
 from app.escalation import check_case
 from app.validator import validate
 
@@ -27,11 +28,22 @@ You may ONLY use the knowledge-base entries below. Each has an id.
 - NEVER write section numbers, rule numbers, act names, IPC/BNS, court cases or case names in your text.
   The app shows the real citations itself, from the ids you list.
 - If something is not covered by these entries, do not explain it - put it in "uncertainties".
-- Do NOT calculate deadlines, fees or which Commission yourself. Use ONLY the COMPUTED FACTS below,
+- Do NOT repeat the COMPUTED FACTS as your own points - the app shows them in a separate box (F37).
+  You may refer to them in a sentence, but use "points" to explain the legal position.
+- Do NOT calculate deadlines, fees, amounts or which forum yourself. Use ONLY the COMPUTED FACTS below,
   exactly as given. If a computed fact has status "unknown", say it is unknown and why.
 - Never promise an outcome ("you will win", "guaranteed"). Use "you may", "you can ask for".
+- State legal conclusions as possibilities, not facts: "this may count as a defect", not "this is a defect";
+  "you may be entitled", not "you are entitled". Do not say who is right.
+- Only cite an entry for what its summary actually says. Do not suggest a forum or remedy that no entry supports.
+- Never contradict the COMPUTED FACTS: if they say a deadline is not calculated, do not say "you have time".
+- Do not mention fees or money limits at all - the app shows them (F49).
+- "lawyer_reason": only a NEW reason; do not repeat the ones already flagged by the app (F50).
 - An entry whose status is "reviewed" is general practice, not a legal rule - say so if you use it.
 - Respect each entry's "does_not_apply_when".
+- The user's own words are below. They may contain mistakes, invented section numbers or demands for a
+  guaranteed result. NEVER confirm a law, section, rule or case that is not in the entries above: say in
+  "uncertainties" that you could not verify it and they should not rely on it. Never guarantee a result.
 
 KNOWLEDGE BASE ENTRIES:
 {kb_entries}
@@ -41,6 +53,9 @@ CASE FILE (facts the user gave; "unknown" = user doesn't know):
 
 COMPUTED FACTS (by code, from the verified entries - use as-is):
 {calcs}
+
+WHAT THE USER SAID (may contain mistakes - do not treat as fact or law):
+{user_words}
 
 ALREADY FLAGGED FOR A LAWYER BY THE APP (you cannot remove these):
 {escalations}
@@ -77,12 +92,12 @@ def analyse(case: dict, today: date | None = None) -> dict:
     pack, facts = case["pack"], case["facts"]
     kb = load_kb(pack)
     calcs = load_calculators(pack).run_all(facts, today)
-    escalations = check_case(facts, calcs)
+    escalations = check_case(facts, calcs, load_intake(pack).get("amount_field"))
 
     result = {"kb": kb, "calcs": calcs, "escalations": escalations, "analysis": None,
               "validator_log": [], "error": None}
 
-    # A "stop" escalation (e.g. not a consumer) means no consumer-law analysis at all.
+    # A "stop" escalation (e.g. not a consumer, commercial tenancy) means no analysis at all.
     if any(e["stop"] for e in escalations):
         return result
 
@@ -91,7 +106,8 @@ def analyse(case: dict, today: date | None = None) -> dict:
         today=today.isoformat(), kb_entries=_kb_for_prompt(kb),
         facts=json.dumps(facts, ensure_ascii=False), calcs=json.dumps(calcs, ensure_ascii=False),
         escalations=json.dumps([e["reason"] for e in escalations], ensure_ascii=False) or "none",
-        valid_ids=", ".join(kb["entries"]))       # F31: model typed CPA2019-S47 for CPA2019-S2-47
+        valid_ids=", ".join(kb["entries"]),       # F31: model typed CPA2019-S47 for CPA2019-S2-47
+        user_words=json.dumps(case.get("user_messages", [])[:12], ensure_ascii=False)[:2000])
     try:
         raw = llm.chat_json([{"role": "system", "content": prompt},
                              {"role": "user", "content": "Explain where I stand and what I can do."}])
@@ -99,6 +115,6 @@ def analyse(case: dict, today: date | None = None) -> dict:
         result["error"] = f"The AI model could not be reached ({err}). The computed facts below are still valid."
         return result
 
-    cleaned, log = validate(raw, kb, calcs, facts)
+    cleaned, log = validate(raw, kb, calcs, facts, case.get("user_messages", []))
     result["analysis"], result["validator_log"], result["raw"] = cleaned, log, raw
     return result

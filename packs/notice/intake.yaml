@@ -1,0 +1,58 @@
+# Intake for the NOTICE EXPLAINER pack (light pack: explanation only, no documents). DATA, not code.
+# Main job: spot WHO sent the notice and WHAT deadline it sets, and escalate official notices.
+
+pack: notice
+title: I received a legal notice - what does it mean? (basics)
+opening_message: >
+  Tell me about the notice you received, in your own words - English, Hindi or Hinglish is fine.
+  For example: who sent it, what it asks you to do, and whether it gives a date.
+  (Please don't paste personal details like your address or account numbers.)
+
+fields:
+  - key: official_sender
+    question: Is the notice from a court, the police, a tribunal or commission, or a government or tax office?
+    question_hinglish: "Kya yeh notice court, police, kisi tribunal/commission, ya sarkari ya tax office se aaya hai?"
+    question_hi: "क्या यह नोटिस अदालत, पुलिस, किसी ट्रिब्यूनल/आयोग, या सरकारी या टैक्स ऑफ़िस से आया है?"
+    type: yesno
+    hint: "true if from a court, police, tribunal, commission, government or tax office; false if from a lawyer, company, bank or person"
+    ask_explicitly: true
+    skip_keyword_check: true   # answers like "nahi, police se nahi" would falsely trip the keyword rule; this question IS the check
+    required: true
+
+  - key: sender
+    question: Who sent it (for example a lawyer for a company, a bank, a landlord or a person)?
+    question_hinglish: "Notice kisne bheja hai (jaise kisi company ka vakil, bank, makaan maalik ya koi vyakti)?"
+    question_hi: "नोटिस किसने भेजा है (जैसे किसी कंपनी का वकील, बैंक, मकान मालिक या कोई व्यक्ति)?"
+    type: text
+    required: true
+
+  - key: about
+    question: In a few words, what is the dispute about (for example rent, a loan, a purchase, a job)?
+    question_hinglish: "Kuch shabdon mein, maamla kis baare mein hai (jaise kiraya, loan, kharidari, naukri)?"
+    question_hi: "कुछ शब्दों में, मामला किस बारे में है (जैसे किराया, कर्ज़, ख़रीदारी, नौकरी)?"
+    type: text
+    required: true
+
+  - key: what_it_demands
+    question: What does the notice ask you to do or pay?
+    question_hinglish: "Notice aapse kya karne ya kitna dene ko keh raha hai?"
+    question_hi: "नोटिस आपसे क्या करने या कितना देने को कह रहा है?"
+    type: text
+    required: true
+
+  - key: received_date
+    question: On what date did you receive the notice?
+    question_hinglish: "Aapko notice kis date ko mila?"
+    question_hi: "आपको नोटिस किस तारीख को मिला?"
+    type: date
+    ask_explicitly: true
+    required: true
+
+  - key: deadline_in_notice
+    question: Does the notice give a deadline? If yes, by what date (or within how many days)?
+    question_hinglish: "Kya notice mein koi deadline di gayi hai? Agar haan, to kis date tak (ya kitne din mein)?"
+    question_hi: "क्या नोटिस में कोई समय-सीमा दी गई है? अगर हाँ, तो किस तारीख तक (या कितने दिन में)?"
+    type: date
+    hint: "a date (YYYY-MM-DD); if it says 'within N days', add N days to the received date; 'unknown' if no deadline"
+    ask_explicitly: true
+    required: true

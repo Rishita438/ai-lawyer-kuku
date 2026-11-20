@@ -20,9 +20,20 @@ from app import llm
 from app.case_file import load_intake, can_draft, missing, UNKNOWN
 from app.kb import load_kb, load_calculators, ROOT
 from app.validator import LEGAL_PATTERNS, CASE_SENSITIVE, PROMISE_PATTERNS
-from app.render import _rupees
 
-NARRATIVE_PROMPT = """You write the "facts of the case" section of a consumer complaint in India.
+
+def _rupees(n) -> str:
+    """Indian-style grouping: 1500000 -> 15,00,000."""
+    s = str(int(n))
+    if len(s) <= 3:
+        return s
+    head, tail = s[:-3], s[-3:]
+    groups = []
+    while len(head) > 2:
+        groups.insert(0, head[-2:]); head = head[:-2]
+    return ",".join(([head] if head else []) + groups + [tail])
+
+NARRATIVE_PROMPT = """You write the "facts" section of a formal letter or complaint in India.
 Write 3 to 5 short numbered paragraphs in formal, plain English, in the first person ("I").
 Use ONLY the facts below. Do not add any fact, name, date, amount, place, opinion or legal conclusion.
 Do not mention any law, section, rule or court case. Do not say what the outcome will be.
@@ -35,11 +46,18 @@ If a fact is a [PLACEHOLDER ...], copy the placeholder text exactly as it is.
 FACTS:
 {facts}
 
-Respond with ONLY JSON: {{"paragraphs": ["1. ...", "2. ..."]}}"""
+Also give English versions of these short fields, for use elsewhere in the document (same meaning, no
+added detail; keep proper names, just write them in English/Latin letters):
+{short_fields}
+
+Respond with ONLY JSON: {{"paragraphs": ["1. ...", "2. ..."], "english": {{"<field>": "<English text>", ...}}}}"""
 
 
 def load_drafts(pack: str) -> list[dict]:
-    return yaml.safe_load((ROOT / "packs" / pack / "drafts.yaml").read_text(encoding="utf-8"))["documents"]
+    path = ROOT / "packs" / pack / "drafts.yaml"
+    if not path.exists():                       # light packs may have no documents yet
+        return []
+    return yaml.safe_load(path.read_text(encoding="utf-8"))["documents"]
 
 
 # ---------- formatting facts ----------
@@ -74,7 +92,7 @@ def fact_values(case: dict) -> dict:
             out[f["key"]] = ", ".join(p.strip().title() for p in str(v).split(",") if p.strip())
         elif f["type"] == "yesno":
             out[f["key"]] = "yes" if v else "no"
-        elif f["key"] in ("seller_name", "product_or_service"):  # "flipkart" -> "Flipkart" in a formal letter
+        elif f.get("capitalise"):                               # "flipkart" -> "Flipkart" in a formal letter
             out[f["key"]] = str(v)[:1].upper() + str(v)[1:]
         else:
             out[f["key"]] = str(v)
@@ -113,7 +131,7 @@ def hinglish_hits(text: str) -> list[str]:
     return hits if len(hits) >= 2 else []
 
 
-def check_narrative(text: str, values: dict) -> list[str]:
+def check_narrative(text: str, values: dict, must_mention: str | None = None) -> list[str]:
     """Problems found in the model's paragraph. Empty list = safe to use."""
     problems = []
     allowed = _allowed_numbers(values)
@@ -128,8 +146,9 @@ def check_narrative(text: str, values: dict) -> list[str]:
         problems += [f"promise: {m.group(0)}" for m in re.finditer(pat, text, re.IGNORECASE)]
     if re.search(r"[\u0900-\u097F]", text) or hinglish_hits(text):
         problems.append("not fully in English: " + " ".join(hinglish_hits(text)[:5] or ["Devanagari text"]))
-    if values.get("seller_name", "").lower() not in text.lower() and not values["seller_name"].startswith("["):
-        problems.append("seller name missing")
+    name = values.get(must_mention, "") if must_mention else ""
+    if name and not name.startswith("[") and name.lower() not in text.lower():
+        problems.append(f"{must_mention} missing")
     return problems
 
 
@@ -138,35 +157,49 @@ def _own_words(text: str) -> str:
     return text if text.startswith("[") else f'(in my own words) "{text}"'
 
 
-def plain_narrative(v: dict) -> str:
-    """Deterministic fallback: a plain paragraph built only from the facts. No AI."""
-    lines = [
-        f"1. On {v['purchase_date']}, I purchased {v['product_or_service']} from {v['seller_name']} "
-        f"for {v['amount_paid']}.",
-        f"2. On {v['problem_date']}, the following problem arose: {_own_words(v['what_went_wrong'])}.",
-        f"3. I purchased it for my personal use." if v.get("for_business_use") == "no" else
-        f"3. Purpose of purchase: [PERSONAL OR BUSINESS USE – please state].",
-        f"4. Steps I have already taken: {_own_words(v['complaints_made'])}.",
-    ]
-    return "\n\n".join(lines)
+def plain_narrative(case: dict, v: dict, fields: list[str]) -> str:
+    """Deterministic fallback, no AI: the pack's own wording if it has one, else a numbered list of facts."""
+    calc = load_calculators(case["pack"])
+    if hasattr(calc, "plain_narrative"):
+        return calc.plain_narrative(v, _own_words)
+    labels = {f["key"]: f.get("label") or f["key"].replace("_", " ").capitalize()
+              for f in load_intake(case["pack"])["fields"]}
+    return "\n\n".join(f"{n}. {labels.get(k, k)}: {_own_words(v[k])}." for n, k in enumerate(fields, 1))
 
 
-def narrative(case: dict, values: dict, log: list) -> str:
-    facts = {k: values[k] for k in ("product_or_service", "seller_name", "bought_online", "amount_paid",
-                                    "purchase_date", "what_went_wrong", "problem_date", "complaints_made")}
-    facts["purpose"] = "personal use" if values.get("for_business_use") == "no" else values.get("for_business_use")
+# Short free-text fields that appear directly in documents: the model gives an English version (checked),
+# otherwise the user's words are quoted. (F42: "My request: 10 guna refund"; F45: seller "मीशो".)
+ENGLISH_FIELDS = ("desired_outcome", "seller_name", "product_or_service", "employer_name")
+
+
+def narrative(case: dict, values: dict, doc: dict, log: list) -> str:
+    fields = doc.get("narrative_fields") or [k for k in values if k not in ("evidence", "desired_outcome")]
+    facts = {k: values[k] for k in fields if k in values}
+    short = {k: values[k] for k in ENGLISH_FIELDS if k in values and not values[k].startswith("[")}
     try:
         out = llm.chat_json([{"role": "system",
-                              "content": NARRATIVE_PROMPT.format(facts=json.dumps(facts, ensure_ascii=False, indent=1))},
+                              "content": NARRATIVE_PROMPT.format(facts=json.dumps(facts, ensure_ascii=False, indent=1),
+                                                                 short_fields=json.dumps(short, ensure_ascii=False))},
                              {"role": "user", "content": "Write the facts section."}])
         text = "\n\n".join(str(p).strip() for p in out.get("paragraphs", []) if str(p).strip())
     except Exception as err:
         log.append(f"model unavailable ({err}) -> plain version used")
-        return plain_narrative(values)
-    problems = check_narrative(text, values) if text else ["empty"]
+        return plain_narrative(case, values, fields)
+
+    # F42/F45: English versions of short fields (desired outcome, names) - each checked like the paragraph.
+    english = out.get("english") if isinstance(out.get("english"), dict) else {}
+    for k, v in english.items():
+        if k in short and isinstance(v, str) and v.strip():
+            issues = check_narrative(v, values)
+            if issues:
+                log.append(f"English version of {k} rejected: " + "; ".join(issues))
+            else:
+                values[k] = v.strip()
+
+    problems = check_narrative(text, values, doc.get("must_mention")) if text else ["empty"]
     if problems:
         log.append("model paragraph rejected -> plain version used: " + "; ".join(problems))
-        return plain_narrative(values)
+        return plain_narrative(case, values, fields)
     return text
 
 
@@ -183,12 +216,12 @@ def available(case: dict) -> list[dict]:
         if d.get("requires_full_case") and not can_draft(case, intake):
             why_not = [f"{f['question']}" + (f" (tip: {f['find_hint']})" if f.get("find_hint") else "")
                        for f in missing(case, intake, for_draft=True)]
-        if d.get("requires_full_case"):
-            calcs = {c["name"]: c for c in load_calculators(case["pack"]).run_all(case["facts"])}
-            if calcs["consumer_check"]["status"] == "probably_not":
-                why_not.append("Bought for business use - consumer law may not apply. Please consult a lawyer.")
-            if calcs["time_limit"]["status"] == "passed":
-                why_not.append("The 2-year time limit may have passed - talk to a lawyer before filing.")
+        calcs = load_calculators(case["pack"]).run_all(case["facts"])
+        stops = [c["escalate"]["reason"] for c in calcs if (c.get("escalate") or {}).get("stop")]
+        if stops:                                          # F43: out of scope -> no documents at all
+            why_not = list(dict.fromkeys(why_not + stops))
+        elif d.get("requires_full_case"):
+            why_not += [c["blocks_drafting"] for c in calcs if c.get("blocks_drafting")]
         out.append({**d, "ok": not why_not, "why_not": why_not})
     return out
 
@@ -202,27 +235,40 @@ def draft(case: dict, doc_id: str) -> dict:
     v = fact_values(case)
     log = []
 
-    city_state = v["user_city_state"]
+    city_state = v.get("user_city_state", "[CITY, STATE]")
     state = city_state.split(",")[-1].strip() if "," in city_state and not city_state.startswith("[") else "[STATE]"
-    amount = case["facts"].get("amount_paid")
+    evidence = v.get("evidence", "[LIST OF DOCUMENTS]")
+    story = narrative(case, v, doc, log)                  # may replace short fields with checked English versions
     slots = {
         **v,
-        "narrative": narrative(case, v, log),
+        "narrative": story,
         "user_state": state.upper() if not state.startswith("[") else state,
-        "amount_paid_fmt": _rupees(amount) if isinstance(amount, (int, float)) else "[AMOUNT PAID]",
-        "problem_date_fmt": v["problem_date"],
-        "evidence_list": "\n".join(f"{i}. {e.strip()}" for i, e in enumerate(v["evidence"].split(","), 1))
-                         if not v["evidence"].startswith("[") else v["evidence"],
-        "forum_citation": cite_inline(kb, "CPR2021-PECUNIARY"),
-        "territorial_citation": cite_inline(kb, "CPA2019-S34"),
-        "limitation_citation": cite_inline(kb, "CPA2019-S69"),
-        "relief_citation": cite_inline(kb, "CPA2019-S39"),
-        # numbers below come from the VERIFIED summary of ECOM2020-R4-5 (48 hours / one month)
-        "ecom_rule_sentence": (f"Under {cite_inline(kb, 'ECOM2020-R4-5')}, the grievance officer is required to "
-                               "acknowledge a consumer complaint within 48 hours and redress it within one month "
-                               "of receiving it. I request you to do so.")
-                              if kb["entries"].get("ECOM2020-R4-5", {}).get("status") == "verified" else "",
+        "evidence_list": "\n".join(f"{i}. {e.strip()}" for i, e in enumerate(evidence.split(","), 1))
+                         if not evidence.startswith("[") else evidence,
     }
+    # F52: "10 guna refund" / "5 lakh compensation" (for a Rs 600 order) went straight into the relief.
+    # A desired outcome with a number or multiplier that is not one of the case's own amounts becomes a
+    # placeholder the user must fill in deliberately.
+    want = str(slots.get("desired_outcome", ""))
+    case_nums = {n.replace(",", "") for k, val in case["facts"].items() if k != "desired_outcome"
+                 for n in re.findall(r"\d[\d,]*", str(val))}
+    want_nums = {n.replace(",", "") for n in re.findall(r"\d[\d,]*", want)}
+    if not want.startswith("[") and ((want_nums - case_nums) or re.search(r"\bguna\b|\btimes\b|\b\d+x\b|गुना", want, re.I)):
+        log.append(f"desired outcome '{want}' contains an amount not supported by the case -> placeholder")
+        slots["desired_outcome"] = "[RELIEF YOU ARE CLAIMING – e.g. refund of the amount paid; compensation is decided by the Commission]"
+    for k in ENGLISH_FIELDS:                           # still Hindi/Hinglish? quote it as the user's own words
+        if k not in slots or slots[k].startswith("["):
+            continue
+        if any(re.search(p, slots[k], 0 if p in CASE_SENSITIVE else re.IGNORECASE) for p in LEGAL_PATTERNS):
+            # F57: the fallback quoted "10 guna refund jo section 420B mein likha hai" into the documents.
+            # A user's words that cite a law/section never go into a document - the user restates them.
+            log.append(f"{k} mentions a law/section -> placeholder (not copied into the document)")
+            slots[k] = f"[{k.replace('_', ' ').upper()} – please write this in your own words, without citing any law]"
+        elif re.search(r"[\u0900-\u097F]", slots[k]) or hinglish_hits(slots[k]):
+            slots[k] = _own_words(slots[k])
+    calc = load_calculators(case["pack"])
+    if hasattr(calc, "draft_slots"):                      # pack-specific slots (amounts, citations, ...)
+        slots.update(calc.draft_slots(case["facts"], v, lambda kb_id: cite_inline(kb, kb_id)))
     template = (ROOT / "packs" / case["pack"] / doc["template"]).read_text(encoding="utf-8")
     text = template.format(**slots)
     placeholders = sorted(set(re.findall(r"\[[A-Z][^\]]*\]", text)))   # [CAPITALISED ...] = to fill in

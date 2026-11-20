@@ -55,29 +55,75 @@ def _numbers_in(text: str) -> set[str]:
     return {n.replace(",", "") for n in re.findall(r"\d[\d,]*(?:\.\d+)?", str(text))}
 
 
-def allowed_numbers(kb: dict, calc_results: list, facts: dict) -> set[str]:
+def allowed_numbers(kb: dict, calc_results: list, facts: dict, user_words: list | None = None) -> set[str]:
     """Numbers the model may use: from cited-able KB text, calculator outputs and the user's facts."""
     allowed = set()
     for e in kb["entries"].values():
         allowed |= _numbers_in(e.get("plain_summary", ""))
     allowed |= _numbers_in(calc_results)
     allowed |= _numbers_in(facts)
+    allowed |= _numbers_in(user_words or [])       # F44: the user's own words ("4 mahine") are a valid source
     return allowed
 
 
-def clean_text(text: str, allowed_nums: set[str], log: list) -> str:
+# "no guarantee", "guarantee nahi di ja sakti", "could not verify section 420B" are HONEST refusals,
+# not promises or citations (F40). A sentence containing one of these is treated as a negation.
+NEGATION = re.compile(r"\b(?:not|no|never|cannot|can't|couldn't|could not|nahi|nahin|nahi\.|mat)\b|नहीं|न ही|मत ",
+                      re.IGNORECASE)
+VERIFY_WORDS = re.compile(r"verif|confirm|find|found|pata|sahi nahi|exist|nahi mil|सत्यापित|पुष्टि|नहीं मिल", re.IGNORECASE)
+
+
+def _sentences(text: str) -> list[str]:
+    return re.split(r"(?<=[.!?।])\s+", text)
+
+
+# Fees and money limits come ONLY from the calculators ("Key facts" box). A model sentence that restates a
+# fee or a forum money limit with a number is dropped (F49: "50 lakh tak koi filing fee nahi" - wrong,
+# but "50 lakh" is a real KB number, so the membership-based number check passed it).
+FEE_WORDS = re.compile(r"\bfees?\b|\bshulk\b|शुल्क|फ़ीस|फीस", re.IGNORECASE)
+LIMIT_WORDS = re.compile(r"\b(?:lakh|lac|crore)\b|लाख|करोड़", re.IGNORECASE)
+FORUM_WORDS = re.compile(r"commission|forum|aayog|आयोग|limit|seema|सीमा", re.IGNORECASE)
+
+
+def restates_computed_fact(sentence: str) -> bool:
+    has_num = bool(re.search(r"\d", sentence))
+    return has_num and (bool(FEE_WORDS.search(sentence)) or
+                        (bool(LIMIT_WORDS.search(sentence)) and bool(FORUM_WORDS.search(sentence))))
+
+
+def clean_text(text: str, allowed_nums: set[str], log: list, allow_unverified_refs: bool = False,
+               drop_computed: bool = True) -> str:
+    """allow_unverified_refs: in "uncertainties", a sentence that says it could NOT verify a law may name it
+    (e.g. "I could not verify the Section 420B you mentioned") - it is then marked as unverified."""
     if not text:
         return text
-    for pat in LEGAL_PATTERNS:
-        flags = 0 if pat in CASE_SENSITIVE else re.IGNORECASE
-        for m in re.finditer(pat, text, flags=flags):
-            log.append({"type": "legal_reference", "text": m.group(0)})
-        text = re.sub(pat, REMOVED_REF, text, flags=flags)
-
-    for pat in PROMISE_PATTERNS:                      # outcome promises -> removed (adversarial case)
-        for m in re.finditer(pat, text, flags=re.IGNORECASE):
-            log.append({"type": "promised_outcome", "text": m.group(0)})
-        text = re.sub(pat, REMOVED_PROMISE, text, flags=re.IGNORECASE)
+    out = []
+    for sent in _sentences(text):
+        if drop_computed and restates_computed_fact(sent):
+            log.append({"type": "restated_fee_or_limit", "text": sent[:160]})
+            continue
+        negated = bool(NEGATION.search(sent))
+        keep_refs = allow_unverified_refs and negated and VERIFY_WORDS.search(sent)
+        for pat in LEGAL_PATTERNS:
+            flags = 0 if pat in CASE_SENSITIVE else re.IGNORECASE
+            if keep_refs:
+                sent = re.sub(pat, lambda m: f"{m.group(0)} (⚠️ not verified - don't rely on it)", sent, flags=flags)
+                continue
+            for m in re.finditer(pat, sent, flags=flags):
+                log.append({"type": "legal_reference", "text": m.group(0)})
+            sent = re.sub(pat, REMOVED_REF, sent, flags=flags)
+        for pat in PROMISE_PATTERNS:
+            def promise_sub(m, sent=sent):
+                # "koi guarantee nahi" / "no ... guaranteed" is a refusal: a negation must sit right next to
+                # the promise word. "pakka jeetoge, haaroge nahi" is still a promise.
+                before, after = sent[max(0, m.start() - 20): m.start()], sent[m.end(): m.end() + 7]
+                if NEGATION.search(before) or NEGATION.search(after):
+                    return m.group(0)
+                log.append({"type": "promised_outcome", "text": m.group(0)})
+                return REMOVED_PROMISE
+            sent = re.sub(pat, promise_sub, sent, flags=re.IGNORECASE)
+        out.append(sent)
+    text = " ".join(out)
 
     def num_sub(m):
         num = (m.group(1) or m.group(2) or "").replace(",", "")
@@ -88,37 +134,59 @@ def clean_text(text: str, allowed_nums: set[str], log: list) -> str:
     return NUMBER_WITH_UNIT.sub(num_sub, text)
 
 
-def validate(analysis: dict, kb: dict, calc_results: list, facts: dict) -> tuple[dict, list]:
-    """Return (cleaned_analysis, log). Never trusts the model's citations or numbers."""
+def _text(x) -> str:
+    """Models sometimes return an object or list where text was asked for (F38). Flatten it to text."""
+    if isinstance(x, dict):
+        return " ".join(_text(v) for v in x.values())
+    if isinstance(x, (list, tuple)):
+        return " ".join(_text(v) for v in x)
+    return "" if x is None else str(x)
+
+
+def _list(x) -> list:
+    return x if isinstance(x, list) else ([] if x in (None, "") else [x])
+
+
+def validate(analysis: dict, kb: dict, calc_results: list, facts: dict, user_words: list | None = None) -> tuple[dict, list]:
+    """Return (cleaned_analysis, log). Never trusts the model's citations, numbers - or its output shape."""
     log, known = [], set(kb["entries"])
-    nums = allowed_numbers(kb, calc_results, facts)
+    if not isinstance(analysis, dict):
+        log.append({"type": "bad_shape", "text": str(analysis)[:120]})
+        analysis = {}
+    nums = allowed_numbers(kb, calc_results, facts, user_words)
 
     def valid_ids(ids):
         good = []
-        for i in ids or []:
+        for i in _list(ids):
+            i = _text(i).strip()
             if i in known:
                 good.append(i)
             else:
                 log.append({"type": "invented_kb_id", "text": str(i)})
         return good
 
-    out = {"summary": clean_text(analysis.get("summary", ""), nums, log),
+    out = {"summary": clean_text(_text(analysis.get("summary", "")), nums, log),
            "points": [], "options": [], "uncertainties": [],
            "suggest_lawyer": bool(analysis.get("suggest_lawyer")),
-           "lawyer_reason": clean_text(analysis.get("lawyer_reason", ""), nums, log)}
+           "lawyer_reason": clean_text(_text(analysis.get("lawyer_reason", "")), nums, log)}
 
-    for p in analysis.get("points", []):
+    for p in _list(analysis.get("points")):
+        p = p if isinstance(p, dict) else {"text": _text(p), "kb_ids": []}
         ids = valid_ids(p.get("kb_ids"))
         if not ids:                                   # a legal point with no real source -> drop it
             log.append({"type": "uncited_point_dropped", "text": str(p.get("text", ""))[:120]})
             continue
-        out["points"].append({"text": clean_text(p.get("text", ""), nums, log), "kb_ids": ids})
+        txt = clean_text(_text(p.get("text", "")), nums, log)
+        if txt.strip():                                  # the whole point may have been a restated fee
+            out["points"].append({"text": txt, "kb_ids": ids})
 
-    for o in analysis.get("options", []):
-        out["options"].append({"title": clean_text(o.get("title", ""), nums, log),
-                               "why": clean_text(o.get("why", ""), nums, log),
-                               "steps": [clean_text(s, nums, log) for s in o.get("steps", [])],
+    for o in _list(analysis.get("options")):
+        o = o if isinstance(o, dict) else {"title": _text(o)}
+        out["options"].append({"title": clean_text(_text(o.get("title", "")), nums, log),
+                               "why": clean_text(_text(o.get("why", "")), nums, log),
+                               "steps": [clean_text(_text(s), nums, log) for s in _list(o.get("steps"))],
                                "kb_ids": valid_ids(o.get("kb_ids"))})
 
-    out["uncertainties"] = [clean_text(u, nums, log) for u in analysis.get("uncertainties", [])]
+    out["uncertainties"] = [clean_text(_text(u), nums, log, allow_unverified_refs=True)
+                            for u in _list(analysis.get("uncertainties"))]
     return out, log

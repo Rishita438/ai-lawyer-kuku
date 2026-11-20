@@ -14,15 +14,17 @@ import streamlit as st
 import yaml
 
 from app import llm
-from app.case_file import new_case, load_intake, missing, can_draft, UNKNOWN
+from app.case_file import new_case, load_intake, missing, can_draft, next_field, UNKNOWN
 from app.intake import run_turn
-from app.escalation import check_message
+from app.escalation import check_message, keyword_check_applies
 from app.analysis import analyse
 from app.render import analysis_md
 from app import drafting
 from html import escape
 
-PACKS_READY = ["consumer"]                       # packs that have an intake.yaml so far
+# Every folder in packs/ with an intake.yaml is a working problem type - adding a problem = adding a folder.
+PACKS_READY = sorted((p.parent.name for p in (ROOT / "packs").glob("*/intake.yaml")),
+                     key=lambda name: (name != "consumer", name))
 
 st.set_page_config(page_title="Nyaya Saathi - AI legal helper", page_icon="⚖️", layout="wide")
 
@@ -50,7 +52,7 @@ with st.sidebar:
         reset(pack)
     st.caption(f"Model: `{llm.CONFIG['model']}` (set in config.yaml)")
     st.caption(f"Knowledge base last verified: **{kb_last_verified(pack)}**")
-    st.caption("Coming next: deposit, salary and notice explainer.")
+    st.caption("Consumer and deposit: full (analysis + documents). Salary and notice: basics (analysis only).")
 
 # ---------- header ----------
 st.title("⚖️ Nyaya Saathi")
@@ -69,10 +71,12 @@ with chat_col:
     user_text = st.chat_input("Type your message (English / हिंदी / Hinglish)")
     if user_text:
         st.session_state.history.append({"role": "user", "content": user_text})
+        st.session_state.case.setdefault("user_messages", []).append(user_text)
         with st.chat_message("user"):
             st.markdown(user_text)
         with st.chat_message("assistant"):
-            hit = check_message(user_text)            # HARD escalation rules run first, in code
+            applies = keyword_check_applies(st.session_state.case, load_intake(pack))
+            hit = check_message(user_text) if applies else None   # HARD escalation rules run first, in code
             if hit:
                 reply = f"⚖️ {hit['message']}"
                 print(f"[escalation] {hit['category']} (matched {hit['matched']!r})")
@@ -102,7 +106,12 @@ with case_col:
     for f in intake["fields"]:
         value = st.session_state.case["facts"].get(f["key"])
         label = f["key"].replace("_", " ").capitalize()
-        if value is None:
+        suggested = st.session_state.case.get("suggested", {})
+        if value is None and f["key"] in suggested:            # F36: mentioned, waiting for confirmation
+            v = suggested[f["key"]]
+            shown = ", ".join(map(str, v)) if isinstance(v, list) else ("Yes" if v is True else "No" if v is False else v)
+            st.markdown(f"💬 **{label}:** {shown} _(you mentioned this - I'll confirm)_")
+        elif value is None:
             st.markdown(f"❓ **{label}:** _not yet_")
         elif value == UNKNOWN:
             st.markdown(f"➖ **{label}:** you don't know")
@@ -121,7 +130,7 @@ with case_col:
         st.success("Intake complete.")
     else:
         st.info(f"{still_needed} question(s) left.")
-    st.caption("Ready to draft a complaint: " + ("yes" if can_draft(st.session_state.case, intake) else "not yet"))
+    st.caption("Ready to draft documents: " + ("yes" if can_draft(st.session_state.case, intake) else "not yet"))
 
     # Transparency: what the citation/number checker removed from the AI's draft.
     res = st.session_state.get("analysis")

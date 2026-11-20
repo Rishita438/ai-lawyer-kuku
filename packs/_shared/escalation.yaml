@@ -1,6 +1,7 @@
 # Hard escalation rules (ADR / Q4: rules always fire; the model may ADD an escalation, never remove one).
 # Keywords are matched as whole words, case-insensitive, in every user message.
 # This is DATA - a lawyer can add keywords without touching code.
+# message_hinglish / message_hi: the referral in the user's language (F48 - the safety message was English-only).
 
 categories:
   safety:
@@ -8,6 +9,8 @@ categories:
       It sounds like someone may be in danger. If you or anyone is in immediate danger,
       call 112 (national emergency number) now. This assistant cannot help with safety
       situations - please contact the police or a trusted person right away.
+    message_hinglish: "Lagta hai kisi ki jaan ya suraksha ko khatra ho sakta hai. Agar aap ya koi bhi turant khatre mein hai, to abhi 112 (national emergency number) par call kijiye. Yeh assistant suraksha ke maamlon mein madad nahi kar sakta - kripya turant police ya kisi bharosemand vyakti se sampark kijiye."
+    message_hi: "लगता है किसी की जान या सुरक्षा को ख़तरा हो सकता है। अगर आप या कोई भी तुरंत ख़तरे में है, तो अभी 112 (राष्ट्रीय आपातकालीन नंबर) पर कॉल कीजिए। यह सहायक सुरक्षा के मामलों में मदद नहीं कर सकता - कृपया तुरंत पुलिस या किसी भरोसेमंद व्यक्ति से संपर्क कीजिए।"
     keywords: [suicide, "kill myself", "maar dalunga", "jaan se maar", violence, maarpeet, "मारपीट", "domestic violence", "ghar me maarta", threat, dhamki, "धमकी"]
 
   criminal:
@@ -15,6 +18,8 @@ categories:
       This involves criminal law or the police, which this assistant does not cover.
       Please talk to a lawyer quickly. You may be eligible for free legal help from your
       District Legal Services Authority or the NALSA helpline 15100.
+    message_hinglish: "Yeh maamla criminal law ya police se juda hai, jo yeh assistant cover nahi karta. Kripya jaldi kisi vakil se baat kijiye. Aapko District Legal Services Authority ya NALSA helpline 15100 se muft kanooni madad mil sakti hai."
+    message_hi: "यह मामला आपराधिक क़ानून या पुलिस से जुड़ा है, जो यह सहायक कवर नहीं करता। कृपया जल्दी किसी वकील से बात कीजिए। आपको ज़िला विधिक सेवा प्राधिकरण या NALSA हेल्पलाइन 15100 से मुफ़्त क़ानूनी मदद मिल सकती है।"
     keywords: [police, fir, arrest, arrested, giraftar, "गिरफ्तार", "पुलिस", warrant, "वारंट", jail, bail, criminal, ipc, bns, bnss, crpc,
                "cheque bounce", "check bounce", "section 138", "negotiable instruments", fraud case, "420"]
 
@@ -24,6 +29,8 @@ categories:
       date you must not miss. This assistant will not advise on it. Please contact a lawyer
       quickly - you may be eligible for free help from your District Legal Services
       Authority or the NALSA helpline 15100.
+    message_hinglish: "Court, tribunal, police ya sarkari office ke notice ya summons mein aisi date ho sakti hai jo chhootni nahi chahiye. Yeh assistant us par salah nahi dega. Kripya jaldi vakil se sampark kijiye - aapko District Legal Services Authority ya NALSA helpline 15100 se muft madad mil sakti hai."
+    message_hi: "अदालत, ट्रिब्यूनल, पुलिस या सरकारी दफ़्तर के नोटिस या समन में ऐसी तारीख़ हो सकती है जो छूटनी नहीं चाहिए। यह सहायक उस पर सलाह नहीं देगा। कृपया जल्दी वकील से संपर्क कीजिए - आपको ज़िला विधिक सेवा प्राधिकरण या NALSA हेल्पलाइन 15100 से मुफ़्त मदद मिल सकती है।"
     keywords: [summons, summon, "समन", "court notice", "court date", "next hearing", tribunal, "income tax notice", "gst notice",
                "tax notice", "consumer commission notice", "notice from consumer forum"]
 
@@ -33,6 +40,8 @@ categories:
       deposits, unpaid salary and private legal notices (basics). Your question is outside
       what it can answer reliably. Please consult a lawyer; you may be eligible for free
       legal help (NALSA helpline 15100).
+    message_hinglish: "Yeh assistant sirf consumer refund/defect (vistaar se), aur security deposit, ruki hui salary aur private legal notice (basics) cover karta hai. Aapka sawaal iske daayre se bahar hai. Kripya kisi vakil se salah lijiye; aapko muft kanooni madad mil sakti hai (NALSA helpline 15100)."
+    message_hi: "यह सहायक सिर्फ़ उपभोक्ता रिफ़ंड/ख़राब सामान (विस्तार से), और सिक्योरिटी डिपॉज़िट, रुकी हुई तनख़्वाह और निजी क़ानूनी नोटिस (बुनियादी) कवर करता है। आपका सवाल इसके दायरे से बाहर है। कृपया किसी वकील से सलाह लीजिए; आपको मुफ़्त क़ानूनी मदद मिल सकती है (NALSA हेल्पलाइन 15100)।"
     keywords: [divorce, talaq, "तलाक", custody, alimony, dowry, dahej, "दहेज", property dispute, "zameen", "will and testament",
                inheritance, immigration, visa, patent, trademark]
 

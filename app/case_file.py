@@ -40,7 +40,12 @@ def merge(case: dict, extracted: dict, explicit_only: set[str] = frozenset(),
     for key, value in (extracted or {}).items():
         if key not in case["facts"] or value in (None, "", []):
             continue
+        current = case["facts"][key]
         if key in explicit_only and key != asked_key:
+            # F36: don't throw it away - hold it as a suggestion the bot will CONFIRM when it asks
+            # this question ("You mentioned 10000 - is that right?"). Nothing enters the case file unconfirmed.
+            if current is None:
+                case.setdefault("suggested", {})[key] = value
             continue
         current = case["facts"][key]
         if value == UNKNOWN and current not in (None, UNKNOWN):
@@ -56,12 +61,19 @@ def merge(case: dict, extracted: dict, explicit_only: set[str] = frozenset(),
     return changed
 
 
+def skipped(case: dict, field: dict) -> bool:
+    """skip_if: {other_key: value} in intake.yaml -> this question is irrelevant when that answer was given
+    (e.g. "last working day" is skipped if the person is still employed)."""
+    cond = field.get("skip_if") or {}
+    return bool(cond) and all(case["facts"].get(k) == v for k, v in cond.items())
+
+
 def missing(case: dict, intake: dict, for_draft: bool = False) -> list[dict]:
     """Fields still empty (None). 'unknown' counts as answered for asking, but NOT for drafting."""
     flag = "required_for_draft" if for_draft else "required"
     out = []
     for f in intake["fields"]:
-        if not f.get(flag):
+        if not f.get(flag) or skipped(case, f):
             continue
         value = case["facts"].get(f["key"])
         if value is None or (for_draft and value == UNKNOWN):
