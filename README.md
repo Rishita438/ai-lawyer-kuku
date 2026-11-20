@@ -3,7 +3,10 @@
 An assistant that helps ordinary people in India understand **where they stand** on a common legal
 problem, **what they can do next**, and **when they need a real lawyer**, in English, Hindi or Hinglish.
 
-**Live demo:** https://nyaya--saathi.streamlit.app/ · **Kuku AI Generalist Assignment, Problem 2 ("Build an AI Lawyer")**
+**Live demo:** https://nyaya--saathi.streamlit.app/ · 
+**Video walkthrough:** https://drive.google.com/file/d/1UGKGzEpZLpwUupXV9yzPeIU9BmMTr93T/view?usp=sharing
+
+**Kuku AI Generalist Assignment, Problem 2 ("Build an AI Lawyer")**
 
 > ⚠️ This is general information from a small, human-verified knowledge base, not legal advice.
 > It is built to say "I don't know" and "see a lawyer" rather than guess.
