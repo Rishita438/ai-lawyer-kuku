@@ -3,7 +3,7 @@
 An assistant that helps ordinary people in India understand **where they stand** on a common legal
 problem, **what they can do next**, and **when they need a real lawyer**, in English, Hindi or Hinglish.
 
-**Live demo:** `<STREAMLIT LINK>` · **Kuku AI Generalist Assignment, Problem 2 ("Build an AI Lawyer")**
+**Live demo:** https://nyaya--saathi.streamlit.app/ · **Kuku AI Generalist Assignment, Problem 2 ("Build an AI Lawyer")**
 
 > ⚠️ This is general information from a small, human-verified knowledge base, not legal advice.
 > It is built to say "I don't know" and "see a lawyer" rather than guess.
@@ -81,23 +81,29 @@ salary and notice packs were added without changing it.
 ## Testing: real runs, unedited outputs, honest failures
 
 - **Offline checks** (no API key): `py scripts/run_all_checks.py`. The KB checker plus
-  `<N>` tests covering calculators, escalation, the validator against a deliberately bad model answer,
-  drafting and all 4 packs.
-- **Real-model test suite:** `py scripts/run_tests.py`. **16 fictional cases** (`tests/cases.yaml`):
+  **102 tests** covering calculators, escalation, the validator against a deliberately bad model answer,
+  drafting, all 4 packs, and a regression test for each failure found in real runs.
+- **Real-model test suite:** `py scripts/run_tests.py`. **17 fictional cases** (`tests/cases.yaml`):
   normal, Hindi/Hinglish, and adversarial (a fake "Section 420B", "guarantee I'll win", time-barred,
   business purchase, shop deposit, cheque bounce, court summons, divorce, a safety threat).
   Every run saves **unedited** transcripts, answers, documents, validator logs and raw model JSON to
   `raw_outputs/run_<date>/`.
 
-| Run | Result |
-|---|---|
-| First full run (`raw_outputs/run_20261120_1350`) | Crashed at case 11/16 (F38); D02 failed (F39). 10/11 completed cases passed all checks |
-| Second full run (`raw_outputs/<RUN FOLDER>`) | `<X/Y>` automatic checks passed. `<NOTES>` |
+| Run | Result | What it taught us |
+|---|---|---|
+| 1 `run_20261120_1350` | Crashed at case 12 of 17 (10 of 11 completed cases passed every check) | Model returned an unexpected JSON shape (F38); a shop deposit looped for 40 calls (F39) |
+| 2 `run_20261120_1410` | **49/50** automatic checks | Then **manual grading** (`tests/GRADING.md`) found 13 more issues the checks can't see, e.g. a wrong fee rule that passed the number check (F49), honest refusals garbled by the validator (F40), English-only safety messages (F48) |
+| 3 `run_20261120_1443` | 43/53 | Gemini's daily free quota ran out; most calls went to the Groq fallback. Exposed rate-limit handling (F54), two test-suite bugs (F55, F56) and a fake section quoted into a document (F57) |
+| 4 `run_20261120_1503`, `_1519` | Re-runs of failed cases | C06, C07, S01, N01 pass. D01's last re-run was blocked by both free daily quotas; it passed in run 2 |
 
-**`FAILURES.md` logs `<NN>` real failures** found while building, each with its cause and fix. Examples:
+Manual grading of run 2 (1-3 scale): accuracy 2.41 · honesty 2.76 · usefulness 2.65 · language 2.06.
+Every score below 3 has a note, and each became a logged failure with a fix or a stated limitation.
+
+**`FAILURES.md` logs 59 real failures** found while building, each with its cause and fix. Examples:
 the model cited a real-but-wrong section (`CPA2019-S47` for `S2-47`, caught by the validator); the model
 overwrote a stated purchase date with the problem date; AI-suggested model names and a government
-portal had been shut down or replaced; the consumer fee table had been amended twice since the AI's knowledge.
+portal had been shut down or replaced; the consumer fee table had been amended twice since the AI's knowledge;
+and twice the AI assistant's own first diagnosis of a bug was wrong (F32, F58) until checked against the raw output.
 `DECISIONS.md` records each design choice and the alternatives considered.
 
 ---
@@ -107,7 +113,7 @@ portal had been shut down or replaced; the consumer fee table had been amended t
 Requires Python 3.11+ and a free API key from Google AI Studio (Groq optional, used as fallback).
 
 ```bash
-git clone <REPO URL> && cd ai-lawyer-india
+git clone https://github.com/Rishita438/ai-lawyer-kuku.git && cd ai-lawyer-kuku
 python -m venv .venv
 .venv\Scripts\activate          # Windows   (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt
@@ -130,7 +136,9 @@ first fails (rate limit, outage).
 - Neutral tone and "don't repeat key facts" are prompt rules only; the model doesn't always follow them.
 - A user can't correct an already-answered fact without starting over (future: an edit button).
 - Salary and notice packs give analysis only, with no documents yet. Practice mode ("talk to the other side") is not built.
-- Free-tier rate limits: under load, some answers come from the fallback model; each test report lists which model answered.
+- Free-tier rate limits: Gemini and Groq both have daily caps, so the live demo can run out of quota. The app
+  retries short limits and switches models, and each test report lists which model answered.
+- Prompt-only rules (not enforced by code): hedged conclusions, neutral tone, no contradictions (F51).
 
 ## How it scales
 
