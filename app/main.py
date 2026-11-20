@@ -87,7 +87,12 @@ with chat_col:
                         reply = result["reply"]
                         st.session_state.done = result["done"]
                     except Exception as err:          # model down, bad JSON twice, etc.
-                        reply = f"Sorry, something went wrong talking to the AI model ({err}). Please try again."
+                        print(f"[app] model error: {err}")   # full details go to the log, not the user (F60)
+                        busy = "429" in str(err) or "rate limit" in str(err).lower()
+                        reply = ("The free AI service this demo uses is busy right now (free-tier limit). "
+                                 "Please wait about a minute and send your last message again - "
+                                 "your case file is kept." if busy else
+                                 "Sorry, the AI model didn't answer this time. Please send your last message again.")
             st.markdown(reply)
         st.session_state.history.append({"role": "assistant", "content": reply})
 

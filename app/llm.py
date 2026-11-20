@@ -34,11 +34,15 @@ def _client(cfg: dict) -> OpenAI:
 
 # F54: when a model says "rate limited", remember it for a while instead of hitting it on every call.
 _COOLDOWN: dict[str, float] = {}       # model name -> time.time() until which we skip it
-MAX_WAIT_SECONDS = 20                  # a short "try again in Xs" is worth waiting for
+MAX_WAIT_SECONDS = 65                  # a per-minute limit ("try again in 40s") is worth waiting for
 
 
 def _retry_after(err: Exception) -> float | None:
-    m = re.search(r"try again in ([\d.]+)\s*(ms|s)", str(err))
+    """How long the provider asks us to wait. Groq says "try again in 0.7s";
+    Gemini says "Please retry in 41.2s" or "retryDelay": "41s" (F60: the old pattern missed Gemini's wording,
+    so a one-minute Gemini limit was treated as "quota used up" and the model was skipped for 5 minutes)."""
+    m = re.search(r"(?:try again|retry) in ([\d.]+)\s*(ms|s)\b", str(err)) or \
+        re.search(r"retryDelay\W+([\d.]+)(s)", str(err))
     if not m:
         return None
     return float(m.group(1)) / (1000 if m.group(2) == "ms" else 1)
